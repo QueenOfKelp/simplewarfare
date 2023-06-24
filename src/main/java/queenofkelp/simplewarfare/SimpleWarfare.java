@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
+import queenofkelp.simplewarfare.grenade.item.GrenadeItem;
 import queenofkelp.simplewarfare.gun.Gun;
 import queenofkelp.simplewarfare.gun.GunSound;
 import queenofkelp.simplewarfare.networking.QPackets;
@@ -37,6 +38,8 @@ public class SimpleWarfare implements ModInitializer {
             false, new ThresholdDamageDropoff(new ArrayList<Double>(List.of(65d, 50d, 25d)), new ArrayList<Float>(List.of(.65f, .8f, 1f))), 2/3d,
             new GunSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, 5, .75f), 4, 3);
 
+    public static final GrenadeItem FRAG_GRENADE_ITEM = new GrenadeItem(new FabricItemSettings());
+
     @Override
     public void onInitialize() {
 
@@ -46,6 +49,7 @@ public class SimpleWarfare implements ModInitializer {
 
         Registry.register(Registries.ITEM, getIdentifier("ak47"), AK47);
         Registry.register(Registries.ITEM, getIdentifier("fakek47"), FAK47);
+        Registry.register(Registries.ITEM, getIdentifier("frag_nade"), FRAG_GRENADE_ITEM);
 
     }
 }
