@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "simplewarfare",
+  "version": "${version}",
+  "name": "Simple Warfare",
+  "description": "Library for adding simple/vanilla-like guns, grenades, gun-wielding mobs, and other essentials for adding guns to minecraft",
+  "authors": ["QueenOfKelp"],
+  "contact": {
+    "repo": "https://github.com/QueenOfKelp/simplewarfare"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/simplewarfare/icon.jpg",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "queenofkelp.simplewarfare.client.SimpleWarfareClient"
+    ],
+    "main": [
+      "queenofkelp.simplewarfare.SimpleWarfare"
+    ]
+  },
+  "mixins": [
+    "simplewarfare.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
