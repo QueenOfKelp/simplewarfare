@@ -5,7 +5,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
 
 
 public class FragGrenadeEntity extends AbstractGrenadeEntity {

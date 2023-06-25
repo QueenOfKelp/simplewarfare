@@ -11,8 +11,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.grenade.entity.AbstractGrenadeEntity;
-import queenofkelp.simplewarfare.grenade.entity.FragGrenadeEntity;
-import queenofkelp.simplewarfare.registry.QEntities;
 
 public abstract class AbstractGrenadeItem extends Item {
 
