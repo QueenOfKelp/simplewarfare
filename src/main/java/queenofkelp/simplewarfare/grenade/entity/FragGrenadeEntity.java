@@ -15,8 +15,8 @@ public class FragGrenadeEntity extends AbstractGrenadeEntity {
         super(entityType, world);
     }
 
-    public FragGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, LivingEntity owner, World world, int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount, boolean spawnParticles) {
-        super(entityType, owner, world, startFuse, frictionAmount, explodeOnImpact, bounceAmount, spawnParticles);
+    public FragGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, LivingEntity owner, World world, int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount) {
+        super(entityType, owner, world, startFuse, frictionAmount, explodeOnImpact, bounceAmount);
     }
 
     public FragGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, double x, double y, double z, World world) {

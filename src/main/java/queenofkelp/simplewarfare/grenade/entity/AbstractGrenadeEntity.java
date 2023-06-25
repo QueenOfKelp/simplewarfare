@@ -1,24 +1,38 @@
 package queenofkelp.simplewarfare.grenade.entity;
 
 import com.google.common.collect.ImmutableList;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import net.minecraft.world.border.WorldBorder;
 import org.jetbrains.annotations.Nullable;
+import queenofkelp.simplewarfare.networking.QPackets;
+
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
@@ -32,14 +46,13 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
 
     protected double bounceAmount;
 
-    protected boolean spawnParticles;
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, World world) {
         super(entityType, world);
     }
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, LivingEntity owner, World world,
-                                 int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount, boolean spawnParticles) {
+                                 int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount) {
         super(entityType, owner, world);
 
         this.startFuse = startFuse;
@@ -47,7 +60,6 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
         this.frictionAmount = frictionAmount;
         this.explodeOnImpact = explodeOnImpact;
         this.bounceAmount = bounceAmount;
-        this.spawnParticles  = spawnParticles;
     }
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, double x, double y, double z, World world) {
@@ -70,6 +82,40 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
         return this.bounceAmount;
     }
 
+    @Override
+    public NbtCompound writeNbt(NbtCompound nbt) {
+        try {
+            nbt.putDouble("GrenadeBounceAmount", this.bounceAmount);
+            nbt.putInt("GrenadeFuse", this.fuse);
+            nbt.putInt("GrenadeStartFuse", this.startFuse);
+            nbt.putDouble("GrenadeFrictionAmount", this.frictionAmount);
+            nbt.putBoolean("GrenadeExplodeOnImpact", this.explodeOnImpact);
+        } catch (Throwable var9) {
+            CrashReport crashReport = CrashReport.create(var9, "Saving entity NBT");
+            CrashReportSection crashReportSection = crashReport.addElement("Entity being saved");
+            this.populateCrashReport(crashReportSection);
+            throw new CrashException(crashReport);
+        }
+        super.writeNbt(nbt);
+        return nbt;
+    }
+
+    @Override
+    public void readNbt(NbtCompound nbt) {
+        try {
+            this.bounceAmount = nbt.getDouble("GrenadeBounceAmount");
+            this.fuse = nbt.getInt("GrenadeFuse");
+            this.startFuse = nbt.getInt("GrenadeStartFuse");
+            this.frictionAmount = nbt.getDouble("GrenadeFrictionAmount");
+            this.explodeOnImpact = nbt.getBoolean("GrenadeExplodeOnImpact");
+        } catch (Throwable var17) {
+            CrashReport crashReport = CrashReport.create(var17, "Loading entity NBT");
+            CrashReportSection crashReportSection = crashReport.addElement("Entity being loaded");
+            this.populateCrashReport(crashReportSection);
+            throw new CrashException(crashReport);
+        }
+        super.readNbt(nbt);
+    }
 
     @Override
     protected Item getDefaultItem() {
@@ -143,7 +189,15 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
     }
 
     protected void explode() {
-        this.kill();
+        this.discard();
+    }
+
+    protected void spawnGrenadeParticles() {
+        for (Entity e : this.getWorld().getOtherEntities(null, this.getBoundingBox().expand(50))) {
+            if (e instanceof ServerPlayerEntity sp) {
+                ServerPlayNetworking.send(sp, QPackets.S2C_SPAWN_PARTICLE, QPackets.makeSpawnParticlesBuffer(ParticleTypes.CAMPFIRE_COSY_SMOKE, this.getX(), this.getY(), this.getZ(), 0, 0, 0));
+            }
+        }
     }
 
     @Override
@@ -163,13 +217,14 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
         }
 
         this.setFuse(this.getFuse() - 1);
-        if (this.spawnParticles) {
-            this.getWorld().addParticle(ParticleTypes.SMOKE, true, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
-        }
-        if(this.getFuse() <= 0) {
-            this.explode();
-        }
 
+        if (!this.getWorld().isClient) {
+            if(this.getFuse() <= 0) {
+                this.explode();
+            }
+
+            this.spawnGrenadeParticles();
+        }
     }
 
     private Vec3d adjustMovementForCollisions(Vec3d movement) {
