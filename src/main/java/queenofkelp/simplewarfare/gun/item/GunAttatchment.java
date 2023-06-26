@@ -1,4 +1,4 @@
-package queenofkelp.simplewarfare.gun;
+package queenofkelp.simplewarfare.gun.item;
 
 import net.minecraft.item.Item;
 

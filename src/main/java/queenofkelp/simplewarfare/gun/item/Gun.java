@@ -1,4 +1,4 @@
-package queenofkelp.simplewarfare.gun;
+package queenofkelp.simplewarfare.gun.item;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -18,14 +18,18 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.*;
+import net.minecraft.util.ClickType;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
 import queenofkelp.simplewarfare.networking.QPackets;
-import queenofkelp.simplewarfare.util.IEntityDataSaver;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
+import queenofkelp.simplewarfare.util.gun.GunBloom;
+import queenofkelp.simplewarfare.util.gun.GunSound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,31 +37,28 @@ import java.util.Objects;
 
 public class Gun extends Item {
 
-    protected Text name; //name of the weapon
+    protected Text name;
     protected float damage;
     protected AmmoType ammoType;
     protected int ammo;
     protected int maxAmmo;
-    protected int fireRate; //how many ticks before the gun shoots another bullet
-    protected double velocity; //how many Blocks the bullets travel in one second
-    protected float recoil; //the angle that the crossheir is pushed up every shot
-    protected int penetration; //how many Blocks/Entities the projectile can hit (fragile Blocks like glass or bouncing)
-    protected double penetrationMaxDropOff;
+    protected int fireRate; //how many ticks before the gun can shoot another bullet
+    protected float velocity; //how fast the bullets travel
+    protected float recoil;
+    protected int penetration; //how many Blocks/Entities the projectile can hit
+    protected double penetrationMaxDropOff; //the maximum damage reduction from penetrating through blocks/entities
     protected int reloadTime; //how long it takes for the gun to reload (in ticks)
-    protected int equipTime; //how long it takes to pull out a gun (in ticks) //TODO use mixin + player nbt instead of item nbt (maybe its kinda cool that you can hand someone a gun and it's ready to go)
+    protected int equipTime; //how long it takes to pull out a gun (in ticks)
     protected boolean isAutomatic;
-    protected float bloom; //how much firing error there is (0 is perfect accuracy)
-    protected DamageDropoff damageDropoff;
+    protected GunBloom bloom; //how much firing error there is
+    protected DamageDropoff damageDropoff; //the damage drop off from distance
     protected GunSound shootSound;
-    protected double movementInaccuracyMult;
-    protected double maxMovementInnaccuracy;
-    protected ArrayList<BulletItem> bulletsLoaded;
 
 
     public Gun(Settings settings, Text name, float damage, AmmoType ammoType, int maxAmmo, int ammo, int fireRate,
-               double velocity, float recoil, float bloom, int penetration,
-               int reloadTime, int equipTime, boolean isAutomatic, DamageDropoff damageDropoff, double penetrationMaxDropOff,
-               GunSound shootSound, double movementInaccuracyMult, double maxMovementInnaccuracy) {
+               float velocity, float recoil, GunBloom bloom, int penetration, double penetrationMaxDropOff,
+               int reloadTime, int equipTime, boolean isAutomatic, DamageDropoff damageDropoff,
+               GunSound shootSound) {
         super(settings);
         this.name = name;
         this.damage = damage;
@@ -75,8 +76,6 @@ public class Gun extends Item {
         this.isAutomatic = isAutomatic;
         this.damageDropoff = damageDropoff;
         this.shootSound = shootSound;
-        this.movementInaccuracyMult = movementInaccuracyMult;
-        this.maxMovementInnaccuracy = maxMovementInnaccuracy;
     }
 
     public void writeDefaultGunNbt(ItemStack gunItem) {
@@ -87,8 +86,34 @@ public class Gun extends Item {
         gunNbt.put("attachments", new NbtList());
     }
 
-    public double getDamage() {
+
+
+    public float getDamage() {
         return this.damage;
+    }
+    public int getFireRate() {
+        return this.fireRate;
+    }
+    public float getVelocity() {
+        return this.velocity;
+    }
+    public float getRecoil() {
+        return this.recoil;
+    }
+    public GunBloom getBloom() {
+        return this.bloom;
+    }
+    public int getPenetration() {
+        return this.penetration;
+    }
+    public double getPenetrationMaxDropOff() {
+        return this.penetrationMaxDropOff;
+    }
+    public DamageDropoff getDamageDropOff() {
+        return this.damageDropoff;
+    }
+    public GunSound getShootSound() {
+        return this.shootSound;
     }
     public boolean getIsAutomatic() {
         return this.isAutomatic;
@@ -98,12 +123,11 @@ public class Gun extends Item {
         return this.reloadTime;
     }
 
-    public AmmoType getAmmoType() {
-        return this.ammoType;
-    }
-
     public int getMaxAmmo() {
         return this.maxAmmo;
+    }
+    public AmmoType getAmmoType() {
+        return this.ammoType;
     }
 
     @Override
@@ -115,26 +139,26 @@ public class Gun extends Item {
             writeDefaultGunNbt(stack);
 
             tooltip.add(Text.literal(
-                            "Ammo:" + " (" + this.ammo + " / " + this.maxAmmo + ")")
+                            "Ammo:" + " (" + this.ammo + " / " + this.getMaxAmmo() + ")")
                     .formatted(Formatting.RESET));
         } else {
             tooltip.add(Text.literal(
-                            "Ammo:" + " (" + itemNbt.getInt("ammo") + " / " + this.maxAmmo + ")")
+                            "Ammo:" + " (" + itemNbt.getInt("ammo") + " / " + this.getMaxAmmo() + ")")
                     .formatted(Formatting.RESET));
         }
 
         tooltip.add(Text.literal(
-                        "Damage: " + this.damage)
+                        "Damage: " + this.getDamage())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.RED))
         );
 
         tooltip.add(Text.literal(
-                        "Fire Rate: " + 20 / this.fireRate + " rps")
+                        "Fire Rate: " + 20 / this.getFireRate() + " rps")
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.AQUA))
         );
 
         tooltip.add(Text.literal(
-                        "Ammo Type: " + this.ammoType.displayName.getString())
+                        "Ammo Type: " + this.getAmmoType().displayName.getString())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.GOLD)));
 
         if (itemNbt.get("attachments") != null) {
@@ -151,15 +175,15 @@ public class Gun extends Item {
         }
 
         tooltip.add(Text.literal(
-                        "Penetration: " + this.penetration)
+                        "Penetration: " + this.getPenetration())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.BLUE)));
 
         tooltip.add(Text.literal(
-                        "Bloom: " + this.bloom)
+                        "Bloom: " + this.getBloom().bloomDegrees)
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)));
 
         tooltip.add(Text.literal(
-                        "Reload Time: " + this.reloadTime)
+                        "Reload Time: " + this.getReloadTime())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
 
     }
@@ -169,22 +193,20 @@ public class Gun extends Item {
 
         if (selected && entity instanceof PlayerEntity user) {
             user.sendMessage(Text.literal(
-                            this.name.getString() + " Ammo: (" + itemNbt.getInt("ammo") + " / " + this.maxAmmo + ")")
+                            this.name.getString() + " Ammo: (" + itemNbt.getInt("ammo") + " / " + this.getMaxAmmo() + ")")
                     .formatted(Formatting.RESET), true);
         }
 
     }
 
-    public void reload(PlayerEntity player, Hand hand, ItemStack item) {
-
-        item.getNbt().putBoolean("reloading", false);
-
+    protected BulletItem typeOfBulletLoaded;
+    public void reload(PlayerEntity player, ItemStack item) {
         NbtCompound itemNbt = item.getNbt();
         int totalBulletsAdded = 0;
-        int totalBulletsRequired = itemNbt.getInt("maxAmmo") - itemNbt.getInt("ammo");
+        int totalBulletsRequired = this.getMaxAmmo() - itemNbt.getInt("ammo");
         for (int i = 0; i < player.getInventory().size(); i++) {
             ItemStack bulletStack = player.getInventory().getStack(i);
-            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.ammoType) {
+            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.getAmmoType()) {
                 if (bulletStack.getCount() >= totalBulletsRequired) {
                     totalBulletsAdded = totalBulletsRequired;
                     totalBulletsRequired = 0;
@@ -210,48 +232,15 @@ public class Gun extends Item {
 
     }
 
-
-    @Override
-    public int getMaxUseTime(ItemStack stack) {
-        return 999;
-    }
-
-    public float getMovementInnacuracy(PlayerEntity user, float movementInnacuracyMult, float maxInnacuracy) {
-        float movementInnacuracy = 0;
-        NbtCompound nbt = ((IEntityDataSaver) user).getPersistentData();
-        if (nbt.get("lastX") == null) {
-            return 0;
-        }
-
-        movementInnacuracy = movementInnacuracy + (Math.abs((float) (user.getX() - nbt.getDouble("lastX"))) * movementInnacuracyMult);
-        movementInnacuracy = movementInnacuracy + (Math.abs((float) (user.getZ() - nbt.getDouble("lastZ"))) * movementInnacuracyMult);
-
-        if (movementInnacuracy > maxInnacuracy) {
-            movementInnacuracy = maxInnacuracy;
-        }
-
-        return movementInnacuracy;
-    }
-
     public void shoot(World world, PlayerEntity user, float pitch, float yaw) {
-        BulletEntity bulletEntity = new BulletEntity(user, world, this.damage, this.fireRate,
-                this.penetration, this.damageDropoff, this.penetrationMaxDropOff);
-        float bloom = this.bloom;
-        if (user.isSneaking() || user.isCrawling()) {
-            bloom = bloom - (bloom * .5f);
-        }
-
-        bloom = bloom + getMovementInnacuracy(user, (float) this.movementInaccuracyMult, (float) this.maxMovementInnaccuracy);
+        BulletEntity bulletEntity = new BulletEntity(user, world, this.getDamage(), this.getFireRate(),
+                this.getPenetration(), this.getDamageDropOff(), this.getPenetrationMaxDropOff());
 
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
 
-        bulletEntity.setVelocity(user, pitch, yaw, 0.0F, (float) this.velocity, bloom);
+        System.out.print("\n Total Bloom: " + this.getBloom().getTotalBloom(user) + "\n");
+        bulletEntity.setVelocity(user, pitch, yaw, 0.0F, this.getVelocity(), this.getBloom().getTotalBloom(user));
         world.spawnEntity(bulletEntity);
-    }
-
-    @Override
-    public UseAction getUseAction(ItemStack item) {
-        return UseAction.NONE;
     }
 
     public boolean onClicked(ItemStack gun, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
@@ -314,14 +303,6 @@ public class Gun extends Item {
                 return;
             }
 
-            /*
-            if (!this.isAutomatic && itemNbt.getBoolean("hasShot")) {
-                return;
-            }
-             */
-
-            itemNbt.putBoolean("hasShot", true);
-
             float pitch = user.getPitch();
             float yaw = user.getYaw();
 
@@ -349,17 +330,15 @@ public class Gun extends Item {
 
                 itemNbt.putInt("ammo", itemNbt.getInt("ammo") - 1);
 
-                //user.damage(GunDamageSource.bullet(null, user), (float) this.getDamage());
-
                 this.shoot(world, user, pitch, yaw);
                 world.playSound(null, user.getBlockPos(), this.shootSound.shootSound, SoundCategory.MASTER, this.shootSound.volume, this.shootSound.pitch);
 
-                user.getItemCooldownManager().set(this, this.fireRate);
+                user.getItemCooldownManager().set(this, this.getFireRate());
                 //recoil after shooting
-                user.setPitch(user.getPitch() - this.recoil);
+                user.setPitch(user.getPitch() - this.getRecoil());
                 //recoil packet
                 PacketByteBuf buffer = PacketByteBufs.create();
-                buffer.writeFloat(this.recoil);
+                buffer.writeFloat(this.getRecoil());
                 ServerPlayNetworking.send(Objects.requireNonNull(Objects.requireNonNull(user.getServer()).getPlayerManager().getPlayer(user.getUuid())), QPackets.S2C_DO_RECOIL, buffer);
 
             }

@@ -8,6 +8,7 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.util.Identifier;
 import queenofkelp.simplewarfare.SimpleWarfare;
 import queenofkelp.simplewarfare.networking.packet.DoRecoilS2CPacket;
+import queenofkelp.simplewarfare.networking.packet.ReloadGunC2SPacket;
 import queenofkelp.simplewarfare.networking.packet.ShootGunC2SPacket;
 import queenofkelp.simplewarfare.networking.packet.SpawnParticleS2CPacket;
 
@@ -16,11 +17,12 @@ public class QPackets {
     public static final Identifier S2C_DO_RECOIL = SimpleWarfare.getIdentifier("recoil");
     public static final Identifier C2S_SHOOT = SimpleWarfare.getIdentifier("shoot");
     public static final Identifier S2C_SPAWN_PARTICLE = SimpleWarfare.getIdentifier("spawn_particle");
-
+    public static final Identifier C2S_RELOAD = SimpleWarfare.getIdentifier("reload");
 
 
     public static void registerC2SPackets() {
         ServerPlayNetworking.registerGlobalReceiver(C2S_SHOOT, ShootGunC2SPacket::receive);
+        ServerPlayNetworking.registerGlobalReceiver(C2S_RELOAD, ReloadGunC2SPacket::receive);
     }
 
     public static void registerS2CPackets() {

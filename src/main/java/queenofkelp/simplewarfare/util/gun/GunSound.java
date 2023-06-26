@@ -1,4 +1,4 @@
-package queenofkelp.simplewarfare.gun;
+package queenofkelp.simplewarfare.util.gun;
 
 import net.minecraft.sound.SoundEvent;
 

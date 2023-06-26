@@ -6,8 +6,8 @@ import queenofkelp.simplewarfare.grenade.entity.AbstractGrenadeEntity;
 import queenofkelp.simplewarfare.grenade.entity.FragGrenadeEntity;
 import queenofkelp.simplewarfare.registry.QEntities;
 
-public class GrenadeItem extends AbstractGrenadeItem{
-    public GrenadeItem(Settings settings) {
+public class FragGrenadeItem extends AbstractGrenadeItem{
+    public FragGrenadeItem(Settings settings) {
         super(settings);
     }
 

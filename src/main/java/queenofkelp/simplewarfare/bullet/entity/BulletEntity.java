@@ -6,9 +6,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -60,6 +64,7 @@ public class BulletEntity extends ThrownItemEntity {
     public BulletEntity(double x, double y, double z, World world) {
         super(QEntities.BULLET_ENTITY, x, y, z, world);
     }
+
     protected double getBounceAmount() {
         return this.bounceAmount;
     }
@@ -153,12 +158,6 @@ public class BulletEntity extends ThrownItemEntity {
 
                 if (block.isIn(QBlockTags.BULLET_BREAKABLE)) {
                     this.getWorld().breakBlock(blockHitResult.getBlockPos(), false, this.getOwner());
-                    if (collisions > penetration) {
-                        this.discard();
-                    }
-                }
-                else if (collisions > penetration) {
-                    this.discard();
                 }
                 else if (block.isIn(QBlockTags.BULLET_STOPPING)) {
                     this.discard();
@@ -169,6 +168,9 @@ public class BulletEntity extends ThrownItemEntity {
                 else {
                     world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_BELL_USE, SoundCategory.MASTER, 1f, 2f);
                     this.bounce(this.getBounceAmount(), blockHitResult.getSide(), oldVelocity);
+                }
+                if (collisions > penetration) {
+                    this.discard();
                 }
             }
         }

@@ -6,7 +6,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import queenofkelp.simplewarfare.gun.Gun;
+import queenofkelp.simplewarfare.gun.item.Gun;
 import queenofkelp.simplewarfare.mixin.KeyBindingMixin;
 
 public class GunKeybindOverlapOverrider {

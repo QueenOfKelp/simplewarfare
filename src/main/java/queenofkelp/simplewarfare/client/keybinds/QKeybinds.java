@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.network.PacketByteBuf;
 import org.lwjgl.glfw.GLFW;
 import queenofkelp.simplewarfare.networking.QPackets;
 
@@ -14,6 +15,14 @@ public class QKeybinds {
     public static KeyBinding reloadKey;
     public static KeyBinding shootKey;
     public static KeyBinding ADSKey;
+
+    public boolean hasPressedShootKey = false;
+
+    public QKeybinds() {
+
+    }
+
+    public static QKeybinds INSTANCE = new QKeybinds();
 
     public static void initialize() {
 
@@ -26,7 +35,7 @@ public class QKeybinds {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (reloadKey.wasPressed()) {
-                //ClientPlayNetworking.send(QPackets.C2S_RELOAD_GUN, PacketByteBufs.create());
+                ClientPlayNetworking.send(QPackets.C2S_RELOAD, PacketByteBufs.create());
             }
         });
 
@@ -39,7 +48,13 @@ public class QKeybinds {
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (shootKey.isPressed()) {
-                ClientPlayNetworking.send(QPackets.C2S_SHOOT, PacketByteBufs.create());
+                PacketByteBuf packet = PacketByteBufs.create();
+                packet.writeBoolean(INSTANCE.hasPressedShootKey);
+                ClientPlayNetworking.send(QPackets.C2S_SHOOT, packet);
+                INSTANCE.hasPressedShootKey = true;
+            }
+            else {
+                INSTANCE.hasPressedShootKey = false;
             }
         });
 
