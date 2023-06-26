@@ -1,4 +1,4 @@
-package queenofkelp.simplewarfare.client;
+package queenofkelp.simplewarfare.client.keybinds;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.PacketByteBuf;
 import org.lwjgl.glfw.GLFW;
 import queenofkelp.simplewarfare.networking.QPackets;
 
@@ -14,27 +13,28 @@ public class QKeybinds {
 
     public static KeyBinding reloadKey;
     public static KeyBinding shootKey;
+    public static KeyBinding ADSKey;
 
     public static void initialize() {
 
         reloadKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.lastshot.reload", // The translation key of the keybinding's name
-                InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_KEY_R, // The keycode of the key
-                "category.lastshot" // The translation key of the keybinding's category.
+                "key.simplewarfare.reload",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_R,
+                "category.simplewarfare"
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (reloadKey.wasPressed()) {
-                //ClientPlayNetworking.send(ModPackets.C2S_RELOAD_GUN_ID, PacketByteBufs.create());
+                //ClientPlayNetworking.send(QPackets.C2S_RELOAD_GUN, PacketByteBufs.create());
             }
         });
 
         shootKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.lastshot.shoot", // The translation key of the keybinding's name
-                InputUtil.Type.MOUSE, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
-                GLFW.GLFW_MOUSE_BUTTON_1, // The keycode of the key
-                "category.lastshot" // The translation key of the keybinding's category.
+                "key.simplewarfare.shoot",
+                InputUtil.Type.MOUSE,
+                GLFW.GLFW_MOUSE_BUTTON_1,
+                "category.simplewarfare"
         ));
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
@@ -43,6 +43,12 @@ public class QKeybinds {
             }
         });
 
+        ADSKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.simplewarfare.ads",
+                InputUtil.Type.MOUSE,
+                GLFW.GLFW_MOUSE_BUTTON_2,
+                "category.simplewarfare"
+        ));
     }
 
 }

@@ -4,10 +4,13 @@
   "package": "queenofkelp.simplewarfare.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "KeyBindingMixin$SelectedItemAccessor",
     "ModEntityDataSaverMixin"
   ],
   "client": [
-
+    "KeyBindingMixin",
+    "KeyBindingMixin$BoundKeyAccessor",
+    "KeyBindingMixin$TimesPressedAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

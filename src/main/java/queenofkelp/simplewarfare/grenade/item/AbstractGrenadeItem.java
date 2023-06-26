@@ -22,12 +22,16 @@ public abstract class AbstractGrenadeItem extends Item {
         return null;
     }
 
+    public void setCooldown(PlayerEntity user) {
+        user.getItemCooldownManager().set(this, 100);
+    }
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
         world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.NEUTRAL, 0.5F, 1F);
 
-        user.getItemCooldownManager().set(this, 100);
+        this.setCooldown(user);
 
         AbstractGrenadeEntity grenadeEntity = this.createDefaultGrenade(user, world);
 

@@ -13,7 +13,6 @@ import queenofkelp.simplewarfare.networking.packet.SpawnParticleS2CPacket;
 
 public class QPackets {
 
-
     public static final Identifier S2C_DO_RECOIL = SimpleWarfare.getIdentifier("recoil");
     public static final Identifier C2S_SHOOT = SimpleWarfare.getIdentifier("shoot");
     public static final Identifier S2C_SPAWN_PARTICLE = SimpleWarfare.getIdentifier("spawn_particle");
