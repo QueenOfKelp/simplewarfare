@@ -81,6 +81,11 @@ public class BulletEntity extends ThrownItemEntity {
             return;
         }
 
+        if (this.damageDropOff == null) {
+            this.discard();
+            return;
+        }
+
         Entity entity = entityHitResult.getEntity();
         this.hitEntities.add(entity);
 

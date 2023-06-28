@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackReference;
 import net.minecraft.item.Item;
@@ -13,16 +13,16 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.UseAction;
+import net.minecraft.util.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
@@ -30,6 +30,7 @@ import queenofkelp.simplewarfare.networking.QPackets;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 import queenofkelp.simplewarfare.util.gun.GunBloom;
 import queenofkelp.simplewarfare.util.gun.GunSound;
+import queenofkelp.simplewarfare.util.gun.GunShooterUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,21 +79,95 @@ public class Gun extends Item {
         this.shootSound = shootSound;
     }
 
-    public void writeDefaultGunNbt(ItemStack gunItem) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
-
-        gunNbt.putInt("ammo", this.ammo);
-
-        gunNbt.put("attachments", new NbtList());
+    public boolean canAttachmentBePutOnGun(ItemStack gunItem, ItemStack attachment) {
+        return true;
     }
 
+    public int getAmmo(ItemStack gunItem) {
+        return gunItem.getOrCreateNbt().getInt("Ammo");
+    }
+    public void setAmmo(ItemStack gunItem, int ammo) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        gunNbt.putInt("Ammo", ammo);
+    }
+    public ArrayList<ItemStack> getAttachments(ItemStack gunItem) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        ArrayList<ItemStack> attachments = new ArrayList<>();
+        NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
 
+        for (NbtElement element : nbtAttachments) {
+            attachments.add(ItemStack.fromNbt((NbtCompound) element));
+        }
+        return attachments;
+    };
+    public boolean tryPutAttachment(ItemStack gunItem, ItemStack attachment) {
+        if (!this.canAttachmentBePutOnGun(gunItem, attachment)) {
+            return false;
+        }
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
+
+        nbtAttachments.add(attachment.writeNbt(new NbtCompound()));
+        gunNbt.put("Attachments", nbtAttachments);
+
+        return true;
+    }
+    public boolean tryRemoveAttachment(ItemStack gunItem, ItemStack attachment) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
+
+        for (NbtElement element : nbtAttachments) {
+            if (element.equals(attachment.getNbt())) {
+                nbtAttachments.remove(element);
+                gunNbt.put("Attachments", nbtAttachments);
+                return true;
+            }
+        }
+        return false;
+    }
+    public ItemStack removeTopGunAttachment(ItemStack gunItem) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
+
+        if (nbtAttachments.isEmpty()) {
+            return null;
+        }
+
+        NbtElement attachmentNbt = nbtAttachments.get(0);
+        nbtAttachments.remove(attachmentNbt);
+
+        gunNbt.put("Attachments", nbtAttachments);
+
+        return ItemStack.fromNbt((NbtCompound) attachmentNbt);
+    }
+    public Item getBulletItemLoaded(ItemStack gunItem) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+
+        if (gunNbt.getString("BulletLoadedID").equals("")) {
+            return null;
+        }
+
+        return Registries.ITEM.get(new Identifier(gunNbt.getString("BulletLoadedID")));
+    }
+    public void setBulletItemLoaded(ItemStack gunItem, @Nullable Item itemToLoad) {
+        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+
+        if (itemToLoad == null) {
+            gunNbt.putString("BulletLoadedID", "");
+        }
+        else {
+            gunNbt.putString("BulletLoadedID", Registries.ITEM.getId(itemToLoad).toString());
+        }
+    }
 
     public float getDamage() {
         return this.damage;
     }
     public int getFireRate() {
         return this.fireRate;
+    }
+    public int getEquipTime() {
+        return this.equipTime;
     }
     public float getVelocity() {
         return this.velocity;
@@ -132,20 +207,9 @@ public class Gun extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
-        NbtCompound itemNbt = stack.getOrCreateNbt();
-
-        if (itemNbt != null && itemNbt.get("ammo") == null) {
-
-            writeDefaultGunNbt(stack);
-
-            tooltip.add(Text.literal(
-                            "Ammo:" + " (" + this.ammo + " / " + this.getMaxAmmo() + ")")
-                    .formatted(Formatting.RESET));
-        } else {
-            tooltip.add(Text.literal(
-                            "Ammo:" + " (" + itemNbt.getInt("ammo") + " / " + this.getMaxAmmo() + ")")
-                    .formatted(Formatting.RESET));
-        }
+        tooltip.add(Text.literal(
+                        "Ammo:" + " (" + this.getAmmo(stack) + " / " + this.getMaxAmmo() + ")")
+                .formatted(Formatting.RESET));
 
         tooltip.add(Text.literal(
                         "Damage: " + this.getDamage())
@@ -161,12 +225,11 @@ public class Gun extends Item {
                         "Ammo Type: " + this.getAmmoType().displayName.getString())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.GOLD)));
 
-        if (itemNbt.get("attachments") != null) {
-            NbtList attachments = itemNbt.getList("attachments", 10);
+        if (!this.getAttachments(stack).isEmpty()) {
+            ArrayList<ItemStack> attachments = this.getAttachments(stack);
             StringBuilder attachmentString = new StringBuilder();
-            for (NbtElement e : attachments) {
-                attachmentString.append(ItemStack.fromNbt((NbtCompound) e).getItem().getName().getString());
-                attachmentString.append(", ");
+            for (ItemStack attachment : attachments) {
+                attachmentString.append(attachment.getItem().getName().getString()).append("x").append(attachment.getCount()).append(", ");
             }
 
             tooltip.add(Text.literal(
@@ -175,7 +238,7 @@ public class Gun extends Item {
         }
 
         tooltip.add(Text.literal(
-                        "Penetration: " + this.getPenetration())
+                        "Penetration: " + this.getPenetration() + " Max Damage Reduction From Penetration: " + this.getPenetrationMaxDropOff())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.BLUE)));
 
         tooltip.add(Text.literal(
@@ -185,54 +248,60 @@ public class Gun extends Item {
         tooltip.add(Text.literal(
                         "Reload Time: " + this.getReloadTime())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+        tooltip.add(Text.literal(
+                        "Distance Dropoff: " + this.getDamageDropOff().getDisplayInformation())
+                .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.DARK_RED)));
 
     }
 
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int slot, boolean selected) {
-        NbtCompound itemNbt = itemStack.getOrCreateNbt();
-
         if (selected && entity instanceof PlayerEntity user) {
             user.sendMessage(Text.literal(
-                            this.name.getString() + " Ammo: (" + itemNbt.getInt("ammo") + " / " + this.getMaxAmmo() + ")")
+                            this.name.getString() + " Ammo: (" + getAmmo(itemStack) + " / " + this.getMaxAmmo() + ")")
                     .formatted(Formatting.RESET), true);
         }
-
     }
 
-    protected BulletItem typeOfBulletLoaded;
-    public void reload(PlayerEntity player, ItemStack item) {
-        NbtCompound itemNbt = item.getNbt();
-        int totalBulletsAdded = 0;
-        int totalBulletsRequired = this.getMaxAmmo() - itemNbt.getInt("ammo");
+    public void reload(PlayerEntity player, ItemStack gunItem) {
+        this.playReloadFinishSound(player, gunItem);
+
+        int bulletsAddedFromStack;
+        int totalBulletsRequired = this.getMaxAmmo() - this.getAmmo(gunItem);
         for (int i = 0; i < player.getInventory().size(); i++) {
             ItemStack bulletStack = player.getInventory().getStack(i);
-            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.getAmmoType()) {
+            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.getAmmoType() &&
+                    (this.getBulletItemLoaded(gunItem) == null || this.getBulletItemLoaded(gunItem).equals(bullet))) {
+                this.setBulletItemLoaded(gunItem, bullet);
                 if (bulletStack.getCount() >= totalBulletsRequired) {
-                    totalBulletsAdded = totalBulletsRequired;
+                    bulletsAddedFromStack = totalBulletsRequired;
                     totalBulletsRequired = 0;
-                    bulletStack.setCount(bulletStack.getCount() - totalBulletsAdded);
+                    bulletStack.setCount(bulletStack.getCount() - bulletsAddedFromStack);
                 } else {
-                    totalBulletsAdded = bulletStack.getCount();
+                    bulletsAddedFromStack = bulletStack.getCount();
                     totalBulletsRequired = totalBulletsRequired - bulletStack.getCount();
                     bulletStack.setCount(0);
                 }
 
-                itemNbt.putInt("ammo", itemNbt.getInt("ammo") + totalBulletsAdded);
-                totalBulletsAdded = 0;
+                this.setAmmo(gunItem, this.getAmmo(gunItem) + bulletsAddedFromStack);
+                bulletsAddedFromStack = 0;
 
-                if (totalBulletsAdded >= totalBulletsRequired) {
-                    player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.MASTER, .2f, 3f);
-                    return;
+                if (bulletsAddedFromStack >= totalBulletsRequired) {
+                    break;
                 }
             }
 
         }
-        player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.MASTER, .2f, 3f);
-
-
     }
 
-    public void shoot(World world, PlayerEntity user, float pitch, float yaw) {
+    public void playReloadFinishSound(PlayerEntity player, ItemStack gunItem) {
+        player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.MASTER, .2f, 3f);
+    }
+    public void playReloadStartSound(PlayerEntity player, ItemStack gunItem) {
+        player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.ENTITY_HORSE_GALLOP, SoundCategory.MASTER,
+                1f, 1f/(this.getReloadTime()*2));
+    }
+
+    public void shoot(World world, PlayerEntity user, float pitch, float yaw, ItemStack gunItem) {
         BulletEntity bulletEntity = new BulletEntity(user, world, this.getDamage(), this.getFireRate(),
                 this.getPenetration(), this.getDamageDropOff(), this.getPenetrationMaxDropOff());
 
@@ -243,35 +312,31 @@ public class Gun extends Item {
         world.spawnEntity(bulletEntity);
     }
 
+    public void checkResetBulletLoaded(ItemStack gunItem) {
+        if (this.getAmmo(gunItem) <= 0) {
+            this.setBulletItemLoaded(gunItem, null);
+        }
+    }
+
     public boolean onClicked(ItemStack gun, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
         if (clickType == ClickType.RIGHT && slot.canTakePartial(player)) {
-
-            NbtCompound nbt = gun.getNbt();
-            if (nbt == null) {
-                return false;
-            }
-            NbtList nbtList = nbt.getList("attachments", 10);
-
             if (otherStack.isEmpty()) {
-                if (nbtList.isEmpty()) {
-                    if (nbt.getInt("ammo") > 0) {
-                        //cursorStackReference.set(new ItemStack(this.ammoType, nbt.getInt("ammo"))); TODO
-                        nbt.putInt("ammo", 0);
+                if (this.getAttachments(gun).isEmpty()) {
+                    if (this.getAmmo(gun) > 0) {
+                        cursorStackReference.set(new ItemStack(this.getBulletItemLoaded(gun), this.getAmmo(gun)));
+                        this.setAmmo(gun, 0);
                         return true;
                     }
                     return false;
                 }
-                cursorStackReference.set(ItemStack.fromNbt((NbtCompound) nbtList.get(0)));
-                nbtList.remove(0);
+                cursorStackReference.set(this.removeTopGunAttachment(gun));
                 return true;
-            } else if (otherStack.getItem() instanceof GunAttatchment) {
-                if (nbtList.size() < 2) {
-                    nbtList.add(otherStack.writeNbt(new NbtCompound()));
+            } else if (otherStack.getItem() instanceof GunAttachmentItem) {
+                if (this.tryPutAttachment(gun, otherStack)) {
                     otherStack.setCount(0);
                     return true;
-                } else {
-                    return false;
                 }
+                return false;
             } else {
                 return false;
             }
@@ -280,67 +345,48 @@ public class Gun extends Item {
         }
     }
 
+    public void playShootSound(BlockPos blockPos, World world) {
+        world.playSound(null, blockPos, this.shootSound.shootSound, SoundCategory.MASTER, this.shootSound.volume, this.shootSound.pitch);
+    }
 
-    public void onFired(World world, LivingEntity shooter, ItemStack gun) {
-        NbtCompound itemNbt = gun.getNbt();
+    public void doRecoil(PlayerEntity shooter) {
+        shooter.setPitch(shooter.getPitch() - this.getRecoil());
+        //recoil packet
+        PacketByteBuf buffer = PacketByteBufs.create();
+        buffer.writeFloat(this.getRecoil());
+        ServerPlayNetworking.send(Objects.requireNonNull(Objects.requireNonNull(shooter.getServer()).getPlayerManager().getPlayer(shooter.getUuid())), QPackets.S2C_DO_RECOIL, buffer);
+    }
 
-        if (shooter instanceof PlayerEntity user && user.getMainHandStack() == gun) {
-
-            /*
-            if (itemNbt.getInt("ammo") <= 0) {
-                return;
-            }
-             */
-
-
-            /*
-            if (user.getItemCooldownManager().isCoolingDown(this) || ((IEntityDataSaver) user).getPersistentData().getBoolean("reloading") ||
-                    !(itemNbt.getBoolean("pulledOut"))) {
-                return;
-            }
-             */
-            if (user.getItemCooldownManager().isCoolingDown(this)) {
+    public void onFired(World world, PlayerEntity shooter, ItemStack gun) {
+        if (shooter.getMainHandStack() == gun) {
+            boolean canShoot = (this.getAmmo(gun) > 0) && (GunShooterUtil.getPlayerReloadTime(shooter) <= 0)
+                    && !shooter.getItemCooldownManager().isCoolingDown(this);
+            if (!canShoot) {
                 return;
             }
 
-            float pitch = user.getPitch();
-            float yaw = user.getYaw();
+            gun.setDamage(gun.getDamage() + 1);
 
-            if (gun.getDamage() > gun.getMaxDamage() - 2) {
-                user.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1f, 1f);
+            if (gun.getDamage() > gun.getMaxDamage()) {
+                shooter.playSound(SoundEvents.ENTITY_ITEM_BREAK, 1f, 1f);
                 gun.setCount(0);
             }
 
             if (!world.isClient) {
-
-                /*
-                if (itemStack.getCount() == 0) {
-                    ItemEntity ie = new ItemEntity(user.getWorld(), user.getX(), user.getY(), user.getZ(),
-                            new ItemStack(this.ammoType, itemNbt.getInt("ammo")));
-                    user.getWorld().spawnEntity(ie);
-                }
-                 */
-
-                if (itemNbt.getInt("ammo") <= 0) {
-                    //return;
+                if (gun.getCount() == 0) {
+                    ItemEntity ie = new ItemEntity(shooter.getWorld(), shooter.getX(), shooter.getY(), shooter.getZ(),
+                            new ItemStack(this.getBulletItemLoaded(gun), this.getAmmo(gun)));
+                    shooter.getWorld().spawnEntity(ie);
                 }
 
-                gun.setDamage(gun.getDamage() + 1);
+                this.setAmmo(gun, this.getAmmo(gun) - 1);
 
+                this.shoot(world, shooter, shooter.getPitch(), shooter.getYaw(), gun);
+                this.playShootSound(shooter.getBlockPos(), world);
 
-                itemNbt.putInt("ammo", itemNbt.getInt("ammo") - 1);
+                shooter.getItemCooldownManager().set(this, this.getFireRate());
 
-                this.shoot(world, user, pitch, yaw);
-                world.playSound(null, user.getBlockPos(), this.shootSound.shootSound, SoundCategory.MASTER, this.shootSound.volume, this.shootSound.pitch);
-
-                user.getItemCooldownManager().set(this, this.getFireRate());
-                //recoil after shooting
-                user.setPitch(user.getPitch() - this.getRecoil());
-                //recoil packet
-                PacketByteBuf buffer = PacketByteBufs.create();
-                buffer.writeFloat(this.getRecoil());
-                ServerPlayNetworking.send(Objects.requireNonNull(Objects.requireNonNull(user.getServer()).getPlayerManager().getPlayer(user.getUuid())), QPackets.S2C_DO_RECOIL, buffer);
-
+                this.doRecoil(shooter);
             }
         }
     }

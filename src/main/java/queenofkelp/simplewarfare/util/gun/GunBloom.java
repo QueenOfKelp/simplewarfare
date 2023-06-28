@@ -44,6 +44,7 @@ public class GunBloom {
         Vec3d previousPos = new Vec3d(shooter.prevX, shooter.prevY, shooter.prevZ);
         Vec3d currentPos = shooter.getPos();
 
+        //System.out.print("\nCurrent shooter pos distance to previous shooter pos: " + currentPos.distanceTo(previousPos) + " \n");
         float movementInaccuracyMult = (float) Math.min(currentPos.distanceTo(previousPos) * this.movementBloomMult, this.maxMovementBloomMult);
 
         return Math.max(movementInaccuracyMult, 1);

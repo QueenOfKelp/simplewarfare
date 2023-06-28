@@ -16,4 +16,12 @@ public class LinearDamageDropoff extends DamageDropoff{
         damage = damage - this.dropoffAmount * ((int) (distance / this.interval));
         return Math.max(damage, this.minimumDamage);
     }
+
+    @Override
+    public String getDisplayInformation() {
+        return "Type: Linear / " +
+                "Interval: " + this.interval + " Blocks / " +
+                "Dropoff Amount: " + this.dropoffAmount + " / " +
+                "Minimum Damage: " + this.minimumDamage;
+    }
 }

@@ -17,4 +17,11 @@ public class ExponentialDamageDropoff extends DamageDropoff{
         return Math.max(damage, this.minimumDamage);
     }
 
+    @Override
+    public String getDisplayInformation() {
+        return "Type: Exponential / " +
+                "Interval: " + this.interval + " Blocks / " +
+                "Multiplier: " + this.dropoffMultiplier + " / " +
+                "Minimum Damage: " + this.minimumDamage;
+    }
 }
