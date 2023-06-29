@@ -2,6 +2,7 @@ package queenofkelp.simplewarfare;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvents;
@@ -10,6 +11,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
+import queenofkelp.simplewarfare.bullet.item.BulletTracerItem;
 import queenofkelp.simplewarfare.gun.Gun;
 import queenofkelp.simplewarfare.gun.GunSound;
 import queenofkelp.simplewarfare.networking.QPackets;

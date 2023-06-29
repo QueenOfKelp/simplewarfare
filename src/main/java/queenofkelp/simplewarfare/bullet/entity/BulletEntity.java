@@ -6,6 +6,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -57,17 +59,12 @@ public class BulletEntity extends ThrownItemEntity {
         this.damageDropOff = damageDropOff;
     }
 
-    public BulletEntity(double x, double y, double z, World world) {
+    public BulletEntity(World world, double x, double y, double z) {
         super(QEntities.BULLET_ENTITY, x, y, z, world);
     }
+
     protected double getBounceAmount() {
         return this.bounceAmount;
-    }
-
-
-    @Override
-    protected Item getDefaultItem() {
-        return null;
     }
 
     protected void onEntityHit(EntityHitResult entityHitResult) {
@@ -88,8 +85,11 @@ public class BulletEntity extends ThrownItemEntity {
         super.onEntityHit(entityHitResult);
 
         float finalDamage = damage;
-        finalDamage = this.damageDropOff.getDamageForDistance(blocksTraveled, finalDamage);
-        finalDamage = finalDamage * (float) Math.pow(this.penetrationMaxDropOff, collisions/(float) this.penetration); //damage reduction for penetration
+
+        if (this.damageDropOff != null) {
+            finalDamage = this.damageDropOff.getDamageForDistance(blocksTraveled, finalDamage);
+            finalDamage = finalDamage * (float) Math.pow(this.penetrationMaxDropOff, collisions / (float) this.penetration); //damage reduction for penetration
+        }
 
         System.out.print(entity + " Damage: " + finalDamage + "    Distance: " + this.blocksTraveled + " \n");
 
@@ -241,4 +241,13 @@ public class BulletEntity extends ThrownItemEntity {
     }
 
 
+    @Override
+    public boolean cannotBeSilenced() {
+        return super.cannotBeSilenced();
+    }
+
+    @Override
+    protected Item getDefaultItem() {
+        return null;
+    }
 }

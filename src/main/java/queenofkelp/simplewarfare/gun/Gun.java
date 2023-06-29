@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Style;
@@ -24,6 +25,7 @@ import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
 import queenofkelp.simplewarfare.networking.QPackets;
+import queenofkelp.simplewarfare.registry.QEntities;
 import queenofkelp.simplewarfare.util.IEntityDataSaver;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 
@@ -51,6 +53,9 @@ public class Gun extends Item {
     protected GunSound shootSound;
     protected double movementInaccuracyMult;
     protected double maxMovementInnaccuracy;
+
+    public static BulletEntity bulletEntity;
+    public static World world;
     protected ArrayList<BulletItem> bulletsLoaded;
 
 
@@ -234,19 +239,26 @@ public class Gun extends Item {
     }
 
     public void shoot(World world, PlayerEntity user, float pitch, float yaw) {
+
         BulletEntity bulletEntity = new BulletEntity(user, world, this.damage, this.fireRate,
                 this.penetration, this.damageDropoff, this.penetrationMaxDropOff);
+
         float bloom = this.bloom;
+        bloom = bloom + getMovementInnacuracy(user, (float) this.movementInaccuracyMult, (float) this.maxMovementInnaccuracy);
+
         if (user.isSneaking() || user.isCrawling()) {
             bloom = bloom - (bloom * .5f);
         }
 
-        bloom = bloom + getMovementInnacuracy(user, (float) this.movementInaccuracyMult, (float) this.maxMovementInnaccuracy);
-
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
-
         bulletEntity.setVelocity(user, pitch, yaw, 0.0F, (float) this.velocity, bloom);
-        world.spawnEntity(bulletEntity);
+
+        Gun.bulletEntity = bulletEntity;
+        Gun.world = world;
+
+        PacketByteBuf buf = PacketByteBufs.create();
+        ServerPlayNetworking.send((ServerPlayerEntity) user, QPackets.S2C_SPAWN_TRACER, buf);
+
     }
 
     @Override
