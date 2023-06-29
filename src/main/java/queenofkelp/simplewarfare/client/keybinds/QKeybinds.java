@@ -17,6 +17,7 @@ public class QKeybinds {
     public static KeyBinding ADSKey;
 
     public boolean hasPressedShootKey = false;
+    public boolean wasADSed;
 
     public QKeybinds() {
 
@@ -64,6 +65,15 @@ public class QKeybinds {
                 GLFW.GLFW_MOUSE_BUTTON_2,
                 "category.simplewarfare"
         ));
+
+        ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if (client.player != null) {
+                if (ADSKey.isPressed() != INSTANCE.wasADSed) {
+                    ClientPlayNetworking.send(QPackets.C2S_SYNC_ADS, QPackets.makeSyncPlayerADSBuffer(client.player, ADSKey.isPressed()));
+                }
+                INSTANCE.wasADSed = ADSKey.isPressed();
+            }
+        });
     }
 
 }

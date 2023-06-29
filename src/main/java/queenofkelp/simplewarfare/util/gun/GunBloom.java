@@ -1,6 +1,7 @@
 package queenofkelp.simplewarfare.util.gun;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
 public class GunBloom {
@@ -28,23 +29,22 @@ public class GunBloom {
         this.crawlingBloomMult = crawlingBloomMult;
     }
 
-    public float getTotalBloom(LivingEntity shooter) {
+    public float getTotalBloom(PlayerEntity shooter) {
         float bloom = this.bloomDegrees;
 
         bloom = bloom * this.getMovementInaccuracyMult(shooter);
 
-        bloom = (shooter.isSneaking()) ? (bloom * this.crouchingBloomMult) : bloom;
+        bloom = (shooter.isSneaking() && !shooter.isCrawling()) ? (bloom * this.crouchingBloomMult) : bloom;
         bloom = (shooter.isCrawling()) ? (bloom * this.crawlingBloomMult) : bloom;
-        //bloom = (shooter.isADS()) ? (bloom * this.ADSBloomMult) : bloom;
+        bloom = (GunShooterUtil.isPlayerADSing(shooter)) ? (bloom * this.ADSBloomMult) : bloom;
 
         return bloom;
     }
 
-    public float getMovementInaccuracyMult(LivingEntity shooter) {
-        Vec3d previousPos = new Vec3d(shooter.prevX, shooter.prevY, shooter.prevZ);
+    public float getMovementInaccuracyMult(PlayerEntity shooter) {
+        Vec3d previousPos = GunShooterUtil.getPlayerPreviousPosition(shooter);
         Vec3d currentPos = shooter.getPos();
 
-        //System.out.print("\nCurrent shooter pos distance to previous shooter pos: " + currentPos.distanceTo(previousPos) + " \n");
         float movementInaccuracyMult = (float) Math.min(currentPos.distanceTo(previousPos) * this.movementBloomMult, this.maxMovementBloomMult);
 
         return Math.max(movementInaccuracyMult, 1);

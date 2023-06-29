@@ -26,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
+import queenofkelp.simplewarfare.gun.item.attachments.AbstractStatModifyingAttachmentItem;
+import queenofkelp.simplewarfare.gun.item.attachments.GunAttachmentItem;
 import queenofkelp.simplewarfare.networking.QPackets;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 import queenofkelp.simplewarfare.util.gun.GunBloom;
@@ -79,19 +81,19 @@ public class Gun extends Item {
         this.shootSound = shootSound;
     }
 
-    public boolean canAttachmentBePutOnGun(ItemStack gunItem, ItemStack attachment) {
+    public boolean canAttachmentBePutOnGun(ItemStack gun, ItemStack attachment) {
         return true;
     }
 
-    public int getAmmo(ItemStack gunItem) {
-        return gunItem.getOrCreateNbt().getInt("Ammo");
+    public int getAmmo(ItemStack gun) {
+        return gun.getOrCreateNbt().getInt("Ammo");
     }
-    public void setAmmo(ItemStack gunItem, int ammo) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public void setAmmo(ItemStack gun, int ammo) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
         gunNbt.putInt("Ammo", ammo);
     }
-    public ArrayList<ItemStack> getAttachments(ItemStack gunItem) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public ArrayList<ItemStack> getAttachments(ItemStack gun) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
         ArrayList<ItemStack> attachments = new ArrayList<>();
         NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
 
@@ -100,11 +102,11 @@ public class Gun extends Item {
         }
         return attachments;
     };
-    public boolean tryPutAttachment(ItemStack gunItem, ItemStack attachment) {
-        if (!this.canAttachmentBePutOnGun(gunItem, attachment)) {
+    public boolean tryPutAttachment(ItemStack gun, ItemStack attachment) {
+        if (!this.canAttachmentBePutOnGun(gun, attachment)) {
             return false;
         }
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+        NbtCompound gunNbt = gun.getOrCreateNbt();
         NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
 
         nbtAttachments.add(attachment.writeNbt(new NbtCompound()));
@@ -112,8 +114,8 @@ public class Gun extends Item {
 
         return true;
     }
-    public boolean tryRemoveAttachment(ItemStack gunItem, ItemStack attachment) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public boolean tryRemoveAttachment(ItemStack gun, ItemStack attachment) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
         NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
 
         for (NbtElement element : nbtAttachments) {
@@ -125,8 +127,8 @@ public class Gun extends Item {
         }
         return false;
     }
-    public ItemStack removeTopGunAttachment(ItemStack gunItem) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public ItemStack removeTopGunAttachment(ItemStack gun) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
         NbtList nbtAttachments = gunNbt.getList("Attachments", 10);
 
         if (nbtAttachments.isEmpty()) {
@@ -140,17 +142,17 @@ public class Gun extends Item {
 
         return ItemStack.fromNbt((NbtCompound) attachmentNbt);
     }
-    public Item getBulletItemLoaded(ItemStack gunItem) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public BulletItem getBulletItemLoaded(ItemStack gun) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
 
         if (gunNbt.getString("BulletLoadedID").equals("")) {
             return null;
         }
 
-        return Registries.ITEM.get(new Identifier(gunNbt.getString("BulletLoadedID")));
+        return (BulletItem) Registries.ITEM.get(new Identifier(gunNbt.getString("BulletLoadedID")));
     }
-    public void setBulletItemLoaded(ItemStack gunItem, @Nullable Item itemToLoad) {
-        NbtCompound gunNbt = gunItem.getOrCreateNbt();
+    public void setBulletItemLoaded(ItemStack gun, @Nullable Item itemToLoad) {
+        NbtCompound gunNbt = gun.getOrCreateNbt();
 
         if (itemToLoad == null) {
             gunNbt.putString("BulletLoadedID", "");
@@ -160,73 +162,177 @@ public class Gun extends Item {
         }
     }
 
-    public float getDamage() {
-        return this.damage;
+    public float getDamage(ItemStack gun) {
+        float damage = this.damage;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                damage = statAttachment.modifyDamage(damage);
+            }
+        }
+
+        return damage;
     }
-    public int getFireRate() {
-        return this.fireRate;
+    public int getFireRate(ItemStack gun) {
+        int fireRate = this.fireRate;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                fireRate = statAttachment.modifyFireRate(fireRate);
+            }
+        }
+
+        return fireRate;
     }
-    public int getEquipTime() {
-        return this.equipTime;
+    public int getEquipTime(ItemStack gun) {
+        int equipTime = this.equipTime;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                equipTime = statAttachment.modifyEquipTime(equipTime);
+            }
+        }
+
+        return equipTime;
     }
-    public float getVelocity() {
-        return this.velocity;
+    public float getVelocity(ItemStack gun) {
+        float velocity = this.velocity;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                velocity = statAttachment.modifyVelocity(velocity);
+            }
+        }
+
+        return velocity;
     }
-    public float getRecoil() {
-        return this.recoil;
+    public float getRecoil(ItemStack gun) {
+        float recoil = this.recoil;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                recoil = statAttachment.modifyRecoil(recoil);
+            }
+        }
+
+        return recoil;
     }
-    public GunBloom getBloom() {
-        return this.bloom;
+    public GunBloom getBloom(ItemStack gun) {
+        GunBloom bloom = this.bloom;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                bloom = statAttachment.modifyBloom(bloom);
+            }
+        }
+
+        return bloom;
     }
-    public int getPenetration() {
-        return this.penetration;
+    public int getPenetration(ItemStack gun) {
+        int penetration = this.penetration;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                penetration = statAttachment.modifyPenetration(penetration);
+            }
+        }
+
+        return penetration;
     }
-    public double getPenetrationMaxDropOff() {
-        return this.penetrationMaxDropOff;
+    public double getPenetrationMaxDropOff(ItemStack gun) {
+        double penetrationMaxDropOff = this.penetrationMaxDropOff;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                penetrationMaxDropOff = statAttachment.modifyMaxPenetrationDropoff(penetrationMaxDropOff);
+            }
+        }
+
+        return penetrationMaxDropOff;
     }
-    public DamageDropoff getDamageDropOff() {
-        return this.damageDropoff;
+    public DamageDropoff getDamageDropOff(ItemStack gun) {
+        DamageDropoff damageDropoff = this.damageDropoff;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                damageDropoff = statAttachment.modifyDamageDropoff(damageDropoff);
+            }
+        }
+
+        return damageDropoff;
     }
-    public GunSound getShootSound() {
-        return this.shootSound;
+    public GunSound getShootSound(ItemStack gun) {
+        GunSound shootSound = this.shootSound;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                shootSound = statAttachment.modifyGunSound(shootSound);
+            }
+        }
+
+        return shootSound;
     }
-    public boolean getIsAutomatic() {
-        return this.isAutomatic;
+    public boolean getIsAutomatic(ItemStack gun) {
+        boolean isAutomatic = this.isAutomatic;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                isAutomatic = statAttachment.modifyIsAutomatic(isAutomatic);
+            }
+        }
+
+        return isAutomatic;
     }
 
-    public int getReloadTime() {
-        return this.reloadTime;
+    public int getReloadTime(ItemStack gun) {
+        int reloadTime = this.reloadTime;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                reloadTime = statAttachment.modifyReloadTime(reloadTime);
+            }
+        }
+
+        return reloadTime;
     }
 
-    public int getMaxAmmo() {
-        return this.maxAmmo;
+    public int getMaxAmmo(ItemStack gun) {
+        int maxAmmo = this.maxAmmo;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                maxAmmo = statAttachment.modifyMaxAmmo(maxAmmo);
+            }
+        }
+
+        return maxAmmo;
     }
-    public AmmoType getAmmoType() {
+    public AmmoType getAmmoType(ItemStack gun) {
         return this.ammoType;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context) {
+    public void appendTooltip(ItemStack gun, World world, List<Text> tooltip, TooltipContext context) {
         tooltip.add(Text.literal(
-                        "Ammo:" + " (" + this.getAmmo(stack) + " / " + this.getMaxAmmo() + ")")
+                        "Ammo:" + " (" + this.getAmmo(gun) + " / " + this.getMaxAmmo(gun) + ")")
                 .formatted(Formatting.RESET));
 
         tooltip.add(Text.literal(
-                        "Damage: " + this.getDamage())
+                        "Damage: " + this.getDamage(gun))
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.RED))
         );
 
         tooltip.add(Text.literal(
-                        "Fire Rate: " + 20 / this.getFireRate() + " rps")
+                        "Fire Rate: " + 20 / this.getFireRate(gun) + " rps")
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.AQUA))
         );
 
         tooltip.add(Text.literal(
-                        "Ammo Type: " + this.getAmmoType().displayName.getString())
+                        "Ammo Type: " + this.getAmmoType(gun).displayName.getString())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.GOLD)));
 
-        if (!this.getAttachments(stack).isEmpty()) {
-            ArrayList<ItemStack> attachments = this.getAttachments(stack);
+        if (!this.getAttachments(gun).isEmpty()) {
+            ArrayList<ItemStack> attachments = this.getAttachments(gun);
             StringBuilder attachmentString = new StringBuilder();
             for (ItemStack attachment : attachments) {
                 attachmentString.append(attachment.getItem().getName().getString()).append("x").append(attachment.getCount()).append(", ");
@@ -238,40 +344,40 @@ public class Gun extends Item {
         }
 
         tooltip.add(Text.literal(
-                        "Penetration: " + this.getPenetration() + " Max Damage Reduction From Penetration: " + this.getPenetrationMaxDropOff())
+                        "Penetration: " + this.getPenetration(gun) + " Max Damage Reduction From Penetration: " + this.getPenetrationMaxDropOff(gun))
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.BLUE)));
 
         tooltip.add(Text.literal(
-                        "Bloom: " + this.getBloom().bloomDegrees)
+                        "Bloom: " + this.getBloom(gun).bloomDegrees)
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)));
 
         tooltip.add(Text.literal(
-                        "Reload Time: " + this.getReloadTime())
+                        "Reload Time: " + this.getReloadTime(gun))
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
         tooltip.add(Text.literal(
-                        "Distance Dropoff: " + this.getDamageDropOff().getDisplayInformation())
+                        "Distance Dropoff: " + this.getDamageDropOff(gun).getDisplayInformation())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.DARK_RED)));
 
     }
 
-    public void inventoryTick(ItemStack itemStack, World world, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack gun, World world, Entity entity, int slot, boolean selected) {
         if (selected && entity instanceof PlayerEntity user) {
             user.sendMessage(Text.literal(
-                            this.name.getString() + " Ammo: (" + getAmmo(itemStack) + " / " + this.getMaxAmmo() + ")")
+                            this.name.getString() + " Ammo: (" + getAmmo(gun) + " / " + this.getMaxAmmo(gun) + ")")
                     .formatted(Formatting.RESET), true);
         }
     }
 
-    public void reload(PlayerEntity player, ItemStack gunItem) {
-        this.playReloadFinishSound(player, gunItem);
+    public void reload(PlayerEntity player, ItemStack gun) {
+        this.playReloadFinishSound(player, gun);
 
         int bulletsAddedFromStack;
-        int totalBulletsRequired = this.getMaxAmmo() - this.getAmmo(gunItem);
+        int totalBulletsRequired = this.getMaxAmmo(gun) - this.getAmmo(gun);
         for (int i = 0; i < player.getInventory().size(); i++) {
             ItemStack bulletStack = player.getInventory().getStack(i);
-            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.getAmmoType() &&
-                    (this.getBulletItemLoaded(gunItem) == null || this.getBulletItemLoaded(gunItem).equals(bullet))) {
-                this.setBulletItemLoaded(gunItem, bullet);
+            if (bulletStack.getItem() instanceof BulletItem bullet && bullet.getBulletType() == this.getAmmoType(gun) &&
+                    (this.getBulletItemLoaded(gun) == null || this.getBulletItemLoaded(gun).equals(bullet))) {
+                this.setBulletItemLoaded(gun, bullet);
                 if (bulletStack.getCount() >= totalBulletsRequired) {
                     bulletsAddedFromStack = totalBulletsRequired;
                     totalBulletsRequired = 0;
@@ -282,7 +388,7 @@ public class Gun extends Item {
                     bulletStack.setCount(0);
                 }
 
-                this.setAmmo(gunItem, this.getAmmo(gunItem) + bulletsAddedFromStack);
+                this.setAmmo(gun, this.getAmmo(gun) + bulletsAddedFromStack);
                 bulletsAddedFromStack = 0;
 
                 if (bulletsAddedFromStack >= totalBulletsRequired) {
@@ -293,28 +399,29 @@ public class Gun extends Item {
         }
     }
 
-    public void playReloadFinishSound(PlayerEntity player, ItemStack gunItem) {
+    public void playReloadFinishSound(PlayerEntity player, ItemStack gun) {
         player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.MASTER, .2f, 3f);
     }
-    public void playReloadStartSound(PlayerEntity player, ItemStack gunItem) {
+    public void playReloadStartSound(PlayerEntity player, ItemStack gun) {
         player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.ENTITY_HORSE_GALLOP, SoundCategory.MASTER,
-                1f, 1f/(this.getReloadTime()*2));
+                1f, 1f/(this.getReloadTime(gun)*2));
     }
 
-    public void shoot(World world, PlayerEntity user, float pitch, float yaw, ItemStack gunItem) {
-        BulletEntity bulletEntity = new BulletEntity(user, world, this.getDamage(), this.getFireRate(),
-                this.getPenetration(), this.getDamageDropOff(), this.getPenetrationMaxDropOff());
+    public void shoot(World world, PlayerEntity user, float pitch, float yaw, ItemStack gun) {
+        BulletEntity bulletEntity = this.getBulletItemLoaded(gun).createBulletForItem(user, world, this.getDamage(gun), this.getFireRate(gun),
+                this.getPenetration(gun), this.getDamageDropOff(gun), this.getPenetrationMaxDropOff(gun));
 
         bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
 
-        System.out.print("\n Total Bloom: " + this.getBloom().getTotalBloom(user) + "\n");
-        bulletEntity.setVelocity(user, pitch, yaw, 0.0F, this.getVelocity(), this.getBloom().getTotalBloom(user));
+        float totalBloom = this.getBloom(gun).getTotalBloom(user);
+        System.out.print("\nBloom: " + totalBloom);
+        bulletEntity.setVelocity(user, pitch, yaw, 0.0F, this.getVelocity(gun), totalBloom);
         world.spawnEntity(bulletEntity);
     }
 
-    public void checkResetBulletLoaded(ItemStack gunItem) {
-        if (this.getAmmo(gunItem) <= 0) {
-            this.setBulletItemLoaded(gunItem, null);
+    public void checkResetBulletLoaded(ItemStack gun) {
+        if (this.getAmmo(gun) <= 0) {
+            this.setBulletItemLoaded(gun, null);
         }
     }
 
@@ -345,15 +452,15 @@ public class Gun extends Item {
         }
     }
 
-    public void playShootSound(BlockPos blockPos, World world) {
-        world.playSound(null, blockPos, this.shootSound.shootSound, SoundCategory.MASTER, this.shootSound.volume, this.shootSound.pitch);
+    public void playShootSound(BlockPos blockPos, World world, ItemStack gun) {
+        world.playSound(null, blockPos, this.getShootSound(gun).shootSound, SoundCategory.MASTER, this.getShootSound(gun).volume, this.getShootSound(gun).pitch);
     }
 
-    public void doRecoil(PlayerEntity shooter) {
-        shooter.setPitch(shooter.getPitch() - this.getRecoil());
+    public void doRecoil(PlayerEntity shooter, ItemStack gun) {
+        shooter.setPitch(shooter.getPitch() - this.getRecoil(gun));
         //recoil packet
         PacketByteBuf buffer = PacketByteBufs.create();
-        buffer.writeFloat(this.getRecoil());
+        buffer.writeFloat(this.getRecoil(gun));
         ServerPlayNetworking.send(Objects.requireNonNull(Objects.requireNonNull(shooter.getServer()).getPlayerManager().getPlayer(shooter.getUuid())), QPackets.S2C_DO_RECOIL, buffer);
     }
 
@@ -382,11 +489,11 @@ public class Gun extends Item {
                 this.setAmmo(gun, this.getAmmo(gun) - 1);
 
                 this.shoot(world, shooter, shooter.getPitch(), shooter.getYaw(), gun);
-                this.playShootSound(shooter.getBlockPos(), world);
+                this.playShootSound(shooter.getBlockPos(), world, gun);
 
-                shooter.getItemCooldownManager().set(this, this.getFireRate());
+                shooter.getItemCooldownManager().set(this, this.getFireRate(gun));
 
-                this.doRecoil(shooter);
+                this.doRecoil(shooter, gun);
             }
         }
     }

@@ -14,14 +14,14 @@ public class ShootGunC2SPacket {
 
         boolean gunWasShotBefore = buf.readBoolean();
 
-        ItemStack item = player.getInventory().getMainHandStack();
+        ItemStack gunStack = player.getInventory().getMainHandStack();
 
-        if (item.getItem() instanceof Gun gun && !player.getItemCooldownManager().isCoolingDown(gun)) {
-            if (gunWasShotBefore && !gun.getIsAutomatic()) {
+        if (gunStack.getItem() instanceof Gun gun && !player.getItemCooldownManager().isCoolingDown(gun)) {
+            if (gunWasShotBefore && !gun.getIsAutomatic(gunStack)) {
                 return;
             }
 
-            gun.onFired(player.getWorld(), player, item);
+            gun.onFired(player.getWorld(), player, gunStack);
         }
     }
 }
