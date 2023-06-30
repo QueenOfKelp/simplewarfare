@@ -7,7 +7,7 @@ public enum AmmoType {
     HEAVY(Text.literal(".50"));
 
 
-    public Text displayName;
+    public final Text displayName;
     AmmoType(Text displayName) {
         this.displayName = displayName;
     }

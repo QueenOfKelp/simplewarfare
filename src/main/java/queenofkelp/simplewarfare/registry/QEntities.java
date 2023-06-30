@@ -10,7 +10,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import queenofkelp.simplewarfare.SimpleWarfare;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
-import queenofkelp.simplewarfare.grenade.entity.FragGrenadeEntity;
+import queenofkelp.simplewarfare.test_code.FragGrenadeEntity;
 
 public class QEntities {
 
