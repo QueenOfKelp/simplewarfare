@@ -20,6 +20,7 @@ public class QPackets {
     public static final Identifier S2C_SYNC_PULLOUT = SimpleWarfare.getIdentifier("sync_pullout");
     public static final Identifier C2S_SYNC_ADS = SimpleWarfare.getIdentifier("sync_ads");
     public static final Identifier S2C_SYNC_ADS = SimpleWarfare.getIdentifier("sync_ads_to_clients");
+    public static final Identifier S2C_SYNC_SHOOT_TIME = SimpleWarfare.getIdentifier("sync_shoot_time");
 
 
     public static void registerC2SPackets() {
@@ -34,6 +35,7 @@ public class QPackets {
         ClientPlayNetworking.registerGlobalReceiver(S2C_SYNC_RELOAD, SyncPlayerReloadingS2CPacket::receive);
         ClientPlayNetworking.registerGlobalReceiver(S2C_SYNC_PULLOUT, SyncPlayerPulloutS2CPacket::receive);
         ClientPlayNetworking.registerGlobalReceiver(S2C_SYNC_ADS, SyncPlayerADSingS2CPacket::receive);
+        ClientPlayNetworking.registerGlobalReceiver(S2C_SYNC_SHOOT_TIME, SyncPlayerShootTimeS2CPacket::receive);
     }
 
     public static PacketByteBuf makeSpawnParticlesBuffer(ParticleEffect effect, double x, double y, double z, double velocityX, double velocityY, double velocityZ) {
@@ -77,6 +79,15 @@ public class QPackets {
 
         buffer.writeString(player.getGameProfile().getName());
         buffer.writeBoolean(ADS);
+
+        return buffer;
+    }
+
+    public static PacketByteBuf makeSyncPlayerShootTimeBuffer(PlayerEntity player, long time) {
+        PacketByteBuf buffer = PacketByteBufs.create();
+
+        buffer.writeString(player.getGameProfile().getName());
+        buffer.writeLong(time);
 
         return buffer;
     }

@@ -21,6 +21,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
@@ -39,31 +40,30 @@ import java.util.List;
 import java.util.Objects;
 
 public class Gun extends Item {
+    public float damage;
+    public AmmoType ammoType;
+    public int ammo;
+    public int maxAmmo;
+    public int fireRate; //how many ticks before the gun can shoot another bullet
+    public float velocity; //how fast the bullets travel
+    public float recoil;
+    public int penetration; //how many Blocks/Entities the projectile can hit
+    public double penetrationMaxDropOff; //the maximum damage reduction from penetrating through blocks/entities
+    public int reloadTime; //how long it takes for the gun to reload (in ticks)
+    public int equipTime; //how long it takes to pull out a gun (in ticks)
+    public boolean isAutomatic;
+    public GunBloom bloom; //how much firing error there is
+    public DamageDropoff damageDropoff; //the damage drop off from distance
+    public GunSound shootSound;
+    public float adsFovMult;
+    public float Speed;
+    public float adsSpeed;
 
-    protected Text name;
-    protected float damage;
-    protected AmmoType ammoType;
-    protected int ammo;
-    protected int maxAmmo;
-    protected int fireRate; //how many ticks before the gun can shoot another bullet
-    protected float velocity; //how fast the bullets travel
-    protected float recoil;
-    protected int penetration; //how many Blocks/Entities the projectile can hit
-    protected double penetrationMaxDropOff; //the maximum damage reduction from penetrating through blocks/entities
-    protected int reloadTime; //how long it takes for the gun to reload (in ticks)
-    protected int equipTime; //how long it takes to pull out a gun (in ticks)
-    protected boolean isAutomatic;
-    protected GunBloom bloom; //how much firing error there is
-    protected DamageDropoff damageDropoff; //the damage drop off from distance
-    protected GunSound shootSound;
-
-
-    public Gun(Settings settings, Text name, float damage, AmmoType ammoType, int maxAmmo, int ammo, int fireRate,
-               float velocity, float recoil, GunBloom bloom, int penetration, double penetrationMaxDropOff,
-               int reloadTime, int equipTime, boolean isAutomatic, DamageDropoff damageDropoff,
-               GunSound shootSound) {
+    public Gun(Settings settings, float damage, AmmoType ammoType, int maxAmmo, int ammo, int fireRate,
+               float velocity, float recoil, GunBloom bloom, float adsFovMult, float Speed, float adsSpeed,
+               int penetration, double penetrationMaxDropOff, int reloadTime, int equipTime, boolean isAutomatic,
+               DamageDropoff damageDropoff, GunSound shootSound) {
         super(settings);
-        this.name = name;
         this.damage = damage;
         this.ammoType = ammoType;
         this.maxAmmo = maxAmmo;
@@ -72,6 +72,9 @@ public class Gun extends Item {
         this.velocity = velocity;
         this.recoil = recoil;
         this.bloom = bloom;
+        this.adsFovMult = adsFovMult;
+        this.Speed = Speed;
+        this.adsSpeed = adsSpeed;
         this.penetration = penetration;
         this.penetrationMaxDropOff = penetrationMaxDropOff;
         this.reloadTime = reloadTime;
@@ -228,6 +231,39 @@ public class Gun extends Item {
 
         return bloom;
     }
+    public float getAdsFovMult(ItemStack gun) {
+        float adsFovMult = this.adsFovMult;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                adsFovMult = statAttachment.modifyAdsFovMult(adsFovMult);
+            }
+        }
+
+        return adsFovMult;
+    }
+    public float getSpeed(ItemStack gun) {
+        float Speed = this.Speed;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                Speed = statAttachment.modifySpeed(Speed);
+            }
+        }
+
+        return Speed;
+    }
+    public float getAdsSpeed(ItemStack gun) {
+        float Speed = this.adsSpeed;
+
+        for (ItemStack attachment : this.getAttachments(gun)) {
+            if (attachment.getItem() instanceof AbstractStatModifyingAttachmentItem statAttachment) {
+                Speed = statAttachment.modifyAdsSpeed(Speed);
+            }
+        }
+
+        return Speed;
+    }
     public int getPenetration(ItemStack gun) {
         int penetration = this.penetration;
 
@@ -311,6 +347,10 @@ public class Gun extends Item {
         return this.ammoType;
     }
 
+    public boolean gunHasDefaultAnimations() {
+        return true;
+    }
+
     @Override
     public void appendTooltip(ItemStack gun, World world, List<Text> tooltip, TooltipContext context) {
         tooltip.add(Text.literal(
@@ -363,7 +403,7 @@ public class Gun extends Item {
     public void inventoryTick(ItemStack gun, World world, Entity entity, int slot, boolean selected) {
         if (selected && entity instanceof PlayerEntity user) {
             user.sendMessage(Text.literal(
-                            this.name.getString() + " Ammo: (" + getAmmo(gun) + " / " + this.getMaxAmmo(gun) + ")")
+                            this.getName().getString() + " Ammo: (" + getAmmo(gun) + " / " + this.getMaxAmmo(gun) + ")")
                     .formatted(Formatting.RESET), true);
         }
     }
@@ -409,13 +449,9 @@ public class Gun extends Item {
 
     public void shoot(World world, PlayerEntity user, float pitch, float yaw, ItemStack gun) {
         BulletEntity bulletEntity = this.getBulletItemLoaded(gun).createBulletForItem(user, world, this.getDamage(gun), this.getFireRate(gun),
-                this.getPenetration(gun), this.getDamageDropOff(gun), this.getPenetrationMaxDropOff(gun));
+                this.getPenetration(gun), this.getDamageDropOff(gun), this.getPenetrationMaxDropOff(gun), new Vec3d(user.getX(), user.getEyeY(), user.getZ()),
+                this.getBloom(gun).getTotalBloom(user), this.getVelocity(gun), pitch, yaw);
 
-        bulletEntity.setPos(user.getX(), user.getEyeY(), user.getZ());
-
-        float totalBloom = this.getBloom(gun).getTotalBloom(user);
-        System.out.print("\nBloom: " + totalBloom);
-        bulletEntity.setVelocity(user, pitch, yaw, 0.0F, this.getVelocity(gun), totalBloom);
         world.spawnEntity(bulletEntity);
     }
 

@@ -5,13 +5,17 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "KeyBindingMixin$SelectedItemAccessor",
+    "LivingEntityMixin",
     "ModEntityDataSaverMixin",
-    "PlayerEntityMixinTick"
+    "PlayerEntityMixin"
   ],
   "client": [
+    "AbstractClientPlayerEntityMixin",
+    "HeldItemRendererMixin",
     "KeyBindingMixin",
     "KeyBindingMixin$BoundKeyAccessor",
-    "KeyBindingMixin$TimesPressedAccessor"
+    "KeyBindingMixin$TimesPressedAccessor",
+    "PlayerEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

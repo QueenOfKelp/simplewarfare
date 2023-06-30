@@ -6,13 +6,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -20,7 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import queenofkelp.simplewarfare.registry.QBlockTags;
+import queenofkelp.simplewarfare.registry.QTags;
 import queenofkelp.simplewarfare.registry.QEntities;
 import queenofkelp.simplewarfare.util.BulletUtil;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
@@ -101,7 +97,7 @@ public class BulletEntity extends ThrownItemEntity {
         finalDamage = this.damageDropOff.getDamageForDistance(blocksTraveled, finalDamage);
         finalDamage = finalDamage * (float) Math.pow(this.penetrationMaxDropOff, collisions/(float) this.penetration); //damage reduction for penetration
 
-        System.out.print(entity + " Damage: " + finalDamage + "    Distance: " + this.blocksTraveled + " \n");
+        //System.out.print(entity + " Damage: " + finalDamage + "    Distance: " + this.blocksTraveled + " \n");
 
         dealBulletDamage(entity);
         doBulletEffects(entity);
@@ -116,14 +112,12 @@ public class BulletEntity extends ThrownItemEntity {
 
     protected void dealBulletDamage(Entity victim) {
         victim.damage(this.getDamageSources().mobProjectile(this, (this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null)), damage);
-
-        if (victim instanceof LivingEntity livingVictim) {
-            livingVictim.timeUntilRegen = Math.min(this.fireRate, 10);
-        }
     }
 
     protected void doBulletEffects(Entity victim) {
-
+        if (victim instanceof LivingEntity livingVictim) {
+            livingVictim.timeUntilRegen = Math.min(this.fireRate, 10);
+        }
     }
 
     protected boolean canHit(Entity entity) {
@@ -157,17 +151,17 @@ public class BulletEntity extends ThrownItemEntity {
 
                 BlockState block = this.getWorld().getBlockState(blockHitResult.getBlockPos());
 
-                if (!block.isIn(QBlockTags.BULLET_PASSABLE)) {
+                if (!block.isIn(QTags.BULLET_PASSABLE)) {
                     this.wallBanging = false;
                 }
 
-                if (block.isIn(QBlockTags.BULLET_BREAKABLE)) {
+                if (block.isIn(QTags.BULLET_BREAKABLE)) {
                     this.getWorld().breakBlock(blockHitResult.getBlockPos(), false, this.getOwner());
                 }
-                else if (block.isIn(QBlockTags.BULLET_STOPPING)) {
+                else if (block.isIn(QTags.BULLET_STOPPING)) {
                     this.discard();
                 }
-                else if (block.isIn(QBlockTags.BULLET_PASSABLE)) {
+                else if (block.isIn(QTags.BULLET_PASSABLE)) {
                     this.wallBanging = true;
                 }
                 else {

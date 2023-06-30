@@ -25,13 +25,13 @@ public abstract class KeyBindingMixin {
     @Shadow private InputUtil.Key boundKey;
 
     @Inject(method = "onKeyPressed", at = @At(value = "HEAD"), cancellable = true)
-    private static void onKeyPressedFixed(InputUtil.Key key, CallbackInfo ci){
+    private static void onKeyPressedOverride(InputUtil.Key key, CallbackInfo ci){
         GunKeybindOverlapOverrider.INSTANCE.onKeyPressed(key);
         ci.cancel();
     }
 
     @Inject(method = "setKeyPressed", at = @At(value = "HEAD"), cancellable = true)
-    private static void setKeyPressedFixed(InputUtil.Key key, boolean pressed, CallbackInfo ci){
+    private static void setKeyPressedOverride(InputUtil.Key key, boolean pressed, CallbackInfo ci){
         GunKeybindOverlapOverrider.INSTANCE.setKeyPressed(key, pressed);
         ci.cancel();
     }

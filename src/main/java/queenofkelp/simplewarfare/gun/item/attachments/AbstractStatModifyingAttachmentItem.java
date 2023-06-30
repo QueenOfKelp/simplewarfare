@@ -27,6 +27,15 @@ public abstract class AbstractStatModifyingAttachmentItem extends GunAttachmentI
     public GunBloom modifyBloom(GunBloom bloom) {
         return bloom;
     }
+    public float modifyAdsFovMult(float mult) {
+        return mult;
+    }
+    public float modifySpeed(float speed) {
+        return speed;
+    }
+    public float modifyAdsSpeed(float speed) {
+        return speed;
+    }
     public int modifyPenetration(int penetration) {
         return penetration;
     }
