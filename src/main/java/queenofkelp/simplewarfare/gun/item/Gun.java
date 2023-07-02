@@ -396,7 +396,9 @@ public class Gun extends Item {
         tooltip.add(Text.literal(
                         "Distance Dropoff: " + this.getDamageDropOff(gun).getDisplayInformation())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.DARK_RED)));
-
+        tooltip.add(Text.literal(
+                        "Velocity: " + this.getVelocity(gun))
+                .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
     }
 
     public void inventoryTick(ItemStack gun, World world, Entity entity, int slot, boolean selected) {
