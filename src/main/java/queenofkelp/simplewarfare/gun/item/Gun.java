@@ -60,7 +60,7 @@ public class Gun extends Item {
     public float Speed;
     public float adsSpeed;
 
-    public Gun(Settings settings, float damage, AmmoType ammoType, int maxAmmo, int ammo, int fireRate,
+    public Gun(Settings settings, float damage, IAmmoType ammoType, int maxAmmo, int ammo, int fireRate,
                float velocity, float recoil, GunBloom bloom, float adsFovMult, float Speed, float adsSpeed,
                int penetration, double penetrationMaxDropOff, int reloadTime, int equipTime, boolean isAutomatic,
                DamageDropoff damageDropoff, GunSound shootSound) {
