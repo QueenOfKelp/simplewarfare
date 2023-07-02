@@ -43,7 +43,6 @@ import java.util.Objects;
 public class Gun extends Item {
     public float damage;
     public IAmmoType ammoType;
-    public int ammo;
     public int maxAmmo;
     public int fireRate; //how many ticks before the gun can shoot another bullet
     public float velocity; //how fast the bullets travel
@@ -60,7 +59,7 @@ public class Gun extends Item {
     public float Speed;
     public float adsSpeed;
 
-    public Gun(Settings settings, float damage, IAmmoType ammoType, int maxAmmo, int ammo, int fireRate,
+    public Gun(Settings settings, float damage, IAmmoType ammoType, int maxAmmo, int fireRate,
                float velocity, float recoil, GunBloom bloom, float adsFovMult, float Speed, float adsSpeed,
                int penetration, double penetrationMaxDropOff, int reloadTime, int equipTime, boolean isAutomatic,
                DamageDropoff damageDropoff, GunSound shootSound) {
@@ -68,7 +67,6 @@ public class Gun extends Item {
         this.damage = damage;
         this.ammoType = ammoType;
         this.maxAmmo = maxAmmo;
-        this.ammo = ammo;
         this.fireRate = fireRate;
         this.velocity = velocity;
         this.recoil = recoil;
