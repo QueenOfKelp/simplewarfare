@@ -9,14 +9,14 @@ import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 
 public class BulletItem extends Item {
 
-    public AmmoType type;
+    public IAmmoType type;
 
     public BulletItem(Settings settings, AmmoType type) {
         super(settings);
         this.type = type;
     }
 
-    public AmmoType getBulletType() {
+    public IAmmoType getBulletType() {
         return this.type;
     }
 

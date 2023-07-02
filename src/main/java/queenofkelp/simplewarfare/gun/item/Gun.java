@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
+import queenofkelp.simplewarfare.bullet.item.IAmmoType;
 import queenofkelp.simplewarfare.gun.item.attachments.AbstractStatModifyingAttachmentItem;
 import queenofkelp.simplewarfare.gun.item.attachments.GunAttachmentItem;
 import queenofkelp.simplewarfare.networking.QPackets;
@@ -41,7 +42,7 @@ import java.util.Objects;
 
 public class Gun extends Item {
     public float damage;
-    public AmmoType ammoType;
+    public IAmmoType ammoType;
     public int ammo;
     public int maxAmmo;
     public int fireRate; //how many ticks before the gun can shoot another bullet
@@ -343,7 +344,7 @@ public class Gun extends Item {
 
         return maxAmmo;
     }
-    public AmmoType getAmmoType(ItemStack gun) {
+    public IAmmoType getAmmoType(ItemStack gun) {
         return this.ammoType;
     }
 
