@@ -1,11 +1,19 @@
 package queenofkelp.simplewarfare.bullet.item;
 
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BulletItem extends Item {
 
@@ -30,4 +38,10 @@ public class BulletItem extends Item {
         return bullet;
     }
 
+    @Override
+    public void appendTooltip(ItemStack bullet, World world, List<Text> tooltip, TooltipContext context) {
+        tooltip.add(Text.literal(
+                        "Ammo Type: " + this.getBulletType().getDisplayName().getString())
+                .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.GOLD)));
+    }
 }
