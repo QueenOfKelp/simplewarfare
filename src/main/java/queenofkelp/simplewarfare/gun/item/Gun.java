@@ -367,7 +367,7 @@ public class Gun extends Item {
         );
 
         tooltip.add(Text.literal(
-                        "Ammo Type: " + this.getAmmoType(gun).displayName.getString())
+                        "Ammo Type: " + this.getAmmoType(gun).getDisplayName().getString())
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.GOLD)));
 
         if (!this.getAttachments(gun).isEmpty()) {
