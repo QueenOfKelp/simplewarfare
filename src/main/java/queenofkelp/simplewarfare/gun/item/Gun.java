@@ -383,7 +383,7 @@ public class Gun extends Item {
         }
 
         tooltip.add(Text.literal(
-                        "Penetration: " + this.getPenetration(gun) + " Max Damage Reduction From Penetration: " + this.getPenetrationMaxDropOff(gun))
+                        "Penetration: " + this.getPenetration(gun) + " --- Max Damage Reduction From Penetration: " + this.getPenetrationMaxDropOff(gun))
                 .formatted(Formatting.RESET).fillStyle(Style.EMPTY.withColor(Formatting.BLUE)));
 
         tooltip.add(Text.literal(
