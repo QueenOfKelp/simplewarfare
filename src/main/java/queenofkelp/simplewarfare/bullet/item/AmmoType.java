@@ -11,4 +11,8 @@ public enum AmmoType implements IAmmoType{
     AmmoType(Text displayName) {
         this.displayName = displayName;
     }
+
+    public Text getDisplayName() {
+        return displayName;
+    }
 }
