@@ -11,7 +11,7 @@ public class BulletItem extends Item {
 
     public IAmmoType type;
 
-    public BulletItem(Settings settings, AmmoType type) {
+    public BulletItem(Settings settings, IAmmoType type) {
         super(settings);
         this.type = type;
     }
