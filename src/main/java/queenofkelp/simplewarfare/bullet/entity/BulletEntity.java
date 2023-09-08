@@ -42,7 +42,7 @@ public class BulletEntity extends ThrownItemEntity {
     public BulletEntity(EntityType<? extends BulletEntity> entityType, World world) {
         super(entityType, world);
     }
-
+//a
     public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world) {
         super(entityType, owner, world);
     }
