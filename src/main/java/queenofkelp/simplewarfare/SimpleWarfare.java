@@ -10,10 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queenofkelp.simplewarfare.bullet.item.AmmoType;
 import queenofkelp.simplewarfare.bullet.item.BulletItem;
-import queenofkelp.simplewarfare.test_code.FragGrenadeItem;
 import queenofkelp.simplewarfare.gun.item.Gun;
 import queenofkelp.simplewarfare.gun.item.attachments.GunAttachmentItem;
-import queenofkelp.simplewarfare.test_code.TestStatAttachment;
 import queenofkelp.simplewarfare.networking.QPackets;
 import queenofkelp.simplewarfare.util.damage_dropoff.ThresholdDamageDropoff;
 import queenofkelp.simplewarfare.util.gun.GunBloom;
@@ -39,8 +37,6 @@ public class SimpleWarfare implements ModInitializer {
     public static final BulletItem MEDIUM_BULLET2 = new BulletItem(new FabricItemSettings(), AmmoType.MEDIUM);
     public static final BulletItem HEAVY_BULLET = new BulletItem(new FabricItemSettings(), AmmoType.HEAVY);
     public static final GunAttachmentItem EPIC_ATTACHMENT = new GunAttachmentItem(new FabricItemSettings());
-    public static final FragGrenadeItem FRAG_GRENADE_ITEM = new FragGrenadeItem(new FabricItemSettings());
-    public static final TestStatAttachment FIRERATE_FAST = new TestStatAttachment(new FabricItemSettings());
 
     @Override
     public void onInitialize() {
@@ -50,11 +46,9 @@ public class SimpleWarfare implements ModInitializer {
         QPackets.registerC2SPackets();
 
         Registry.register(Registries.ITEM, getIdentifier("ak47"), AK47);
-        Registry.register(Registries.ITEM, getIdentifier("frag_nade"), FRAG_GRENADE_ITEM);
         Registry.register(Registries.ITEM, getIdentifier("medium_bullet"), MEDIUM_BULLET);
         Registry.register(Registries.ITEM, getIdentifier("medium_bullet2"), MEDIUM_BULLET2);
         Registry.register(Registries.ITEM, getIdentifier("heavy_bullet"), HEAVY_BULLET);
         Registry.register(Registries.ITEM, getIdentifier("epic_attachment"), EPIC_ATTACHMENT);
-        Registry.register(Registries.ITEM, getIdentifier("fast_attachment"), FIRERATE_FAST);
     }
 }

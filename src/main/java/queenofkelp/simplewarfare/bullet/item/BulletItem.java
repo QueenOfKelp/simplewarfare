@@ -10,10 +10,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
-import queenofkelp.simplewarfare.registry.QEntities;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BulletItem extends Item {
@@ -29,14 +27,18 @@ public class BulletItem extends Item {
         return this.type;
     }
 
+
     public BulletEntity createBulletForItem(LivingEntity shooter, World world, float damage, int fireRate, int penetration, DamageDropoff dropOff, double penetrationDropoff,
                                             Vec3d pos, float bloom, float velocity, float pitch, float yaw) {
+        /*
         BulletEntity bullet = new BulletEntity(QEntities.BULLET_ENTITY, shooter, world, damage, fireRate, penetration, dropOff, penetrationDropoff);
 //a
         bullet.setPosition(pos);
         bullet.setVelocity(shooter, pitch, yaw, 0.0F, velocity, bloom);
 
         return bullet;
+         */
+        return null;
     }
 
     @Override

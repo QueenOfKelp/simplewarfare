@@ -17,7 +17,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.registry.QTags;
-import queenofkelp.simplewarfare.registry.QEntities;
 import queenofkelp.simplewarfare.util.BulletUtil;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 
