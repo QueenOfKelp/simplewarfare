@@ -1,0 +1,50 @@
+{
+  "minecraft:recipes/food/cooked_chicken_from_campfire_cooking": {
+    "criteria": {
+      "has_chicken": "2023-06-25 12:21:14 -0600"
+    },
+    "done": true
+  },
+  "minecraft:recipes/food/cooked_chicken": {
+    "criteria": {
+      "has_chicken": "2023-06-25 12:21:14 -0600"
+    },
+    "done": true
+  },
+  "minecraft:recipes/food/cooked_chicken_from_smoking": {
+    "criteria": {
+      "has_chicken": "2023-06-25 12:21:14 -0600"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/arrow": {
+    "criteria": {
+      "has_feather": "2023-06-25 12:21:14 -0600"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2023-06-25 12:18:35 -0600"
+    },
+    "done": true
+  },
+  "minecraft:adventure/root": {
+    "criteria": {
+      "killed_something": "2023-06-25 12:19:00 -0600"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:old_growth_pine_taiga": "2023-06-25 12:19:39 -0600",
+      "minecraft:taiga": "2023-06-25 12:19:09 -0600",
+      "minecraft:river": "2023-06-25 12:19:15 -0600",
+      "minecraft:forest": "2023-06-25 12:20:09 -0600",
+      "minecraft:old_growth_birch_forest": "2023-06-25 12:18:36 -0600",
+      "minecraft:plains": "2023-06-25 12:20:26 -0600"
+    },
+    "done": false
+  },
+  "DataVersion": 3337
+}

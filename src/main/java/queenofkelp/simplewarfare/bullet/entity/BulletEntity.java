@@ -43,13 +43,13 @@ public class BulletEntity extends ThrownItemEntity {
         super(entityType, world);
     }
 
-    public BulletEntity(LivingEntity owner, World world) {
-        super(QEntities.BULLET_ENTITY, owner, world);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world) {
+        super(entityType, owner, world);
     }
 
-    public BulletEntity(LivingEntity owner, World world, float damage, int fireRate,
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world, float damage, int fireRate,
                         int penetration, DamageDropoff damageDropOff, double penetrationMaxDropOff) {
-        super(QEntities.BULLET_ENTITY, owner, world);
+        super(entityType, owner, world);
         this.damage = damage;
         this.fireRate = fireRate;
         this.penetration = penetration;
@@ -57,8 +57,8 @@ public class BulletEntity extends ThrownItemEntity {
         this.damageDropOff = damageDropOff;
     }
 
-    public BulletEntity(double x, double y, double z, World world) {
-        super(QEntities.BULLET_ENTITY, x, y, z, world);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, double x, double y, double z, World world) {
+        super(entityType, x, y, z, world);
     }
 
     protected double getBounceAmount() {
