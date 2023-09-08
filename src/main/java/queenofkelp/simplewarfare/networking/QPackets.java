@@ -59,7 +59,7 @@ public class QPackets {
     public static PacketByteBuf makeSyncPlayerReloadingBuffer(PlayerEntity player, int reloadTime) {
         PacketByteBuf buffer = PacketByteBufs.create();
 
-        buffer.writeString(player.getGameProfile().getName());
+        buffer.writeUuid(player.getUuid());
         buffer.writeInt(reloadTime);
 
         return buffer;
@@ -68,7 +68,7 @@ public class QPackets {
     public static PacketByteBuf makeSyncPlayerPulloutBuffer(PlayerEntity player, int pulloutTime) {
         PacketByteBuf buffer = PacketByteBufs.create();
 
-        buffer.writeString(player.getGameProfile().getName());
+        buffer.writeUuid(player.getUuid());
         buffer.writeInt(pulloutTime);
 
         return buffer;
@@ -77,7 +77,7 @@ public class QPackets {
     public static PacketByteBuf makeSyncPlayerADSBuffer(PlayerEntity player, boolean ADS) {
         PacketByteBuf buffer = PacketByteBufs.create();
 
-        buffer.writeString(player.getGameProfile().getName());
+        buffer.writeUuid(player.getUuid());
         buffer.writeBoolean(ADS);
 
         return buffer;
@@ -86,7 +86,7 @@ public class QPackets {
     public static PacketByteBuf makeSyncPlayerShootTimeBuffer(PlayerEntity player, long time) {
         PacketByteBuf buffer = PacketByteBufs.create();
 
-        buffer.writeString(player.getGameProfile().getName());
+        buffer.writeUuid(player.getUuid());
         buffer.writeLong(time);
 
         return buffer;

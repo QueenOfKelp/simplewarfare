@@ -13,10 +13,15 @@ public class SyncPlayerPulloutS2CPacket {
     public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender packetSender) {
 
-        String playerName = buf.readString();
+        UUID playerUUID = buf.readUuid();
         int reloadTime = buf.readInt();
 
-        GunShooterUtil.setPlayerGunPullOutTime(Objects.requireNonNull(client.getServer()).getPlayerManager().getPlayer(playerName), reloadTime);
+        if (client.player == null || client.player.getWorld() == null || client.player.getWorld().getPlayerByUuid(playerUUID) == null) {
+            return;
+        }
+
+        GunShooterUtil.setPlayerGunPullOutTime(client.player.getWorld().getPlayerByUuid(playerUUID), reloadTime);
 
     }
+
 }

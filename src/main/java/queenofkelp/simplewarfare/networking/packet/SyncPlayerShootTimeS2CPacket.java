@@ -7,15 +7,20 @@ import net.minecraft.network.PacketByteBuf;
 import queenofkelp.simplewarfare.util.gun.GunShooterUtil;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class SyncPlayerShootTimeS2CPacket {
     public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender packetSender) {
 
-        String playerName = buf.readString();
+        UUID playerUUID = buf.readUuid();
         long shootTime = buf.readLong();
 
-        GunShooterUtil.setPlayerLastShootTime(Objects.requireNonNull(client.getServer()).getPlayerManager().getPlayer(playerName), shootTime);
+        if (client.player == null || client.player.getWorld() == null || client.player.getWorld().getPlayerByUuid(playerUUID) == null) {
+            return;
+        }
+
+        GunShooterUtil.setPlayerLastShootTime(client.player.getWorld().getPlayerByUuid(playerUUID), shootTime);
 
     }
 }

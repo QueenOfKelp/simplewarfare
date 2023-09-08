@@ -16,10 +16,10 @@ public class SyncPlayerADSingC2SPacket {
     public static void receive(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender responseSender) {
 
-        String playerName = buf.readString();
+        UUID playerUUID = buf.readUuid();
         boolean playerADSing = buf.readBoolean();
 
-        GunShooterUtil.setPlayerADS(server.getPlayerManager().getPlayer(playerName), playerADSing);
+        GunShooterUtil.setPlayerADS(server.getPlayerManager().getPlayer(playerUUID), playerADSing);
 
         for (ServerPlayerEntity sp : Objects.requireNonNull(player.getServer()).getPlayerManager().getPlayerList()) {
             ServerPlayNetworking.send(sp, QPackets.S2C_SYNC_ADS, QPackets.makeSyncPlayerADSBuffer(player, playerADSing));

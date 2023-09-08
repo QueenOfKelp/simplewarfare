@@ -7,15 +7,20 @@ import net.minecraft.network.PacketByteBuf;
 import queenofkelp.simplewarfare.util.gun.GunShooterUtil;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class SyncPlayerADSingS2CPacket {
     public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler,
                                PacketByteBuf buf, PacketSender packetSender) {
 
-        String playerName = buf.readString();
+        UUID playerUUID = buf.readUuid();
         boolean ads = buf.readBoolean();
 
-        GunShooterUtil.setPlayerADS(Objects.requireNonNull(client.getServer()).getPlayerManager().getPlayer(playerName), ads);
+        if (client.player == null || client.player.getWorld() == null || client.player.getWorld().getPlayerByUuid(playerUUID) == null) {
+            return;
+        }
+
+        GunShooterUtil.setPlayerADS(client.player.getWorld().getPlayerByUuid(playerUUID), ads);
 
     }
 }
