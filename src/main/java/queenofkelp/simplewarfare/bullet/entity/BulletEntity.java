@@ -7,6 +7,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.BlockHitResult;
@@ -16,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import queenofkelp.simplewarfare.SimpleWarfare;
 import queenofkelp.simplewarfare.registry.QTags;
 import queenofkelp.simplewarfare.util.BulletUtil;
 import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
@@ -110,7 +113,7 @@ public class BulletEntity extends ThrownItemEntity {
     }
 
     protected void dealBulletDamage(Entity victim) {
-        victim.damage(this.getDamageSources().mobProjectile(this, (this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null)), damage);
+        victim.damage(this.getDamageSources().create(RegistryKey.of(RegistryKeys.DAMAGE_TYPE, SimpleWarfare.getIdentifier("bullet")), (this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null)), damage);
     }
 
     protected void doBulletEffects(Entity victim) {

@@ -14,6 +14,9 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -23,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import queenofkelp.simplewarfare.SimpleWarfare;
 import queenofkelp.simplewarfare.bulletproof_armor.BulletproofArmorMaterial;
 import queenofkelp.simplewarfare.gun.item.Gun;
 import queenofkelp.simplewarfare.networking.QPackets;
@@ -128,7 +132,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public float applyBulletproofArmorToDamage(DamageSource source, float amount) {
         int bulletproofArmor = 0;
 
-        if (!source.isIn(QTags.BULLETPROOF_ARMOR_STOPS)) {
+        if (!source.isIn(QTags.USES_BULLETPROOF_PROECTION_INSTEAD)) {
             return amount;
         }
 
@@ -153,5 +157,4 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private float injectedNewDamageAmount(float original, DamageSource source, float amount) {
         return applyBulletproofArmorToDamage(source, original);
     }
-
 }
