@@ -6,7 +6,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import queenofkelp.simplewarfare.registry.QParticles;
 
 public class SpawnParticleS2CPacket {
 
@@ -29,8 +28,8 @@ public class SpawnParticleS2CPacket {
         if (s.equals(ParticleTypes.CAMPFIRE_COSY_SMOKE.asString())) {
             particleType = ParticleTypes.CAMPFIRE_COSY_SMOKE;
         }
-        else if (s.equals(QParticles.SIMPLE_TRACER.asString())) {
-            particleType = QParticles.SIMPLE_TRACER;
+        else if (s.equals(ParticleTypes.CRIT.asString())) {
+            particleType = ParticleTypes.CRIT;
         }
         else {
             System.out.print("particle was not found in possible particles");

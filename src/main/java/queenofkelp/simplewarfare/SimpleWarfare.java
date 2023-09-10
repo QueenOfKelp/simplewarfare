@@ -13,7 +13,6 @@ import queenofkelp.simplewarfare.bullet.item.BulletItem;
 import queenofkelp.simplewarfare.gun.item.Gun;
 import queenofkelp.simplewarfare.gun.item.attachments.GunAttachmentItem;
 import queenofkelp.simplewarfare.networking.QPackets;
-import queenofkelp.simplewarfare.registry.QParticles;
 import queenofkelp.simplewarfare.util.damage_dropoff.ThresholdDamageDropoff;
 import queenofkelp.simplewarfare.util.gun.GunBloom;
 import queenofkelp.simplewarfare.util.gun.GunSound;
@@ -45,7 +44,6 @@ public class SimpleWarfare implements ModInitializer {
         LOGGER.info("Simple Warfare initializing");
 
         QPackets.registerC2SPackets();
-        QParticles.registerParticles();
 
         Registry.register(Registries.ITEM, getIdentifier("ak47"), AK47);
         Registry.register(Registries.ITEM, getIdentifier("medium_bullet"), MEDIUM_BULLET);

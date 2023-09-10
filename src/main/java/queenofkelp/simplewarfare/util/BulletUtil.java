@@ -18,7 +18,6 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.networking.QPackets;
-import queenofkelp.simplewarfare.registry.QParticles;
 
 import java.util.Iterator;
 import java.util.function.Predicate;
@@ -41,10 +40,14 @@ public class BulletUtil {
 
         Direction facing = Direction.getFacing(direction.getX(), direction.getY(), direction.getZ());
 
+        int steps = 0;
         while(currentPos.distanceTo(start) <= start.distanceTo(end)) {
-            for (Entity e : entity.getWorld().getOtherEntities(null, entity.getBoundingBox().expand(100))) {
-                if (e instanceof ServerPlayerEntity sp) {
-                    ServerPlayNetworking.send(sp, QPackets.S2C_SPAWN_PARTICLE, QPackets.makeSpawnParticlesBuffer(QParticles.SIMPLE_TRACER, currentPos.getX(), currentPos.getY() - .01, currentPos.getZ(), 0, 0, 0));
+
+            if (steps % 100 == 0) {
+                for (Entity e : entity.getWorld().getOtherEntities(null, entity.getBoundingBox().expand(100))) {
+                    if (e instanceof ServerPlayerEntity sp) {
+                        ServerPlayNetworking.send(sp, QPackets.S2C_SPAWN_PARTICLE, QPackets.makeSpawnParticlesBuffer(ParticleTypes.CRIT, currentPos.getX(), currentPos.getY() - .01, currentPos.getZ(), 0, 0, 0));
+                    }
                 }
             }
 
@@ -77,6 +80,7 @@ public class BulletUtil {
                 return new BlockHitResult(currentPos, facing, blockpos, true);
             }
 
+            steps++;
             currentPos = currentPos.add(direction.multiply(.01));
         }
         return BlockHitResult.createMissed(end, facing, BlockPos.ofFloored(end));
