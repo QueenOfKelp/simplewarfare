@@ -1,8 +1,11 @@
 package queenofkelp.simplewarfare.util;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -14,6 +17,8 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
+import queenofkelp.simplewarfare.networking.QPackets;
+import queenofkelp.simplewarfare.registry.QParticles;
 
 import java.util.Iterator;
 import java.util.function.Predicate;
@@ -37,6 +42,11 @@ public class BulletUtil {
         Direction facing = Direction.getFacing(direction.getX(), direction.getY(), direction.getZ());
 
         while(currentPos.distanceTo(start) <= start.distanceTo(end)) {
+            for (Entity e : entity.getWorld().getOtherEntities(null, entity.getBoundingBox().expand(100))) {
+                if (e instanceof ServerPlayerEntity sp) {
+                    ServerPlayNetworking.send(sp, QPackets.S2C_SPAWN_PARTICLE, QPackets.makeSpawnParticlesBuffer(QParticles.SIMPLE_TRACER, currentPos.getX(), currentPos.getY() - .01, currentPos.getZ(), 0, 0, 0));
+                }
+            }
 
             Box offsetBox = entity.getBoundingBox().offset(currentPos.subtract(start));
 
@@ -69,8 +79,6 @@ public class BulletUtil {
 
             currentPos = currentPos.add(direction.multiply(.01));
         }
-
         return BlockHitResult.createMissed(end, facing, BlockPos.ofFloored(end));
-
     }
 }

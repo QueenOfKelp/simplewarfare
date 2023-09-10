@@ -30,6 +30,7 @@ public class BulletItem extends Item {
 
     public BulletEntity createBulletForItem(LivingEntity shooter, World world, float damage, int fireRate, int penetration, DamageDropoff dropOff, double penetrationDropoff,
                                             Vec3d pos, float bloom, float velocity, float pitch, float yaw) {
+
         /*
         BulletEntity bullet = new BulletEntity(QEntities.BULLET_ENTITY, shooter, world, damage, fireRate, penetration, dropOff, penetrationDropoff);
 //a

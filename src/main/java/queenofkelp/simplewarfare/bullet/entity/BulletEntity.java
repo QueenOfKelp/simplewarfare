@@ -99,9 +99,7 @@ public class BulletEntity extends ThrownItemEntity {
         finalDamage = this.damageDropOff.getDamageForDistance(blocksTraveled, finalDamage);
         finalDamage = finalDamage * (float) Math.pow(this.penetrationMaxDropOff, collisions/(float) this.penetration); //damage reduction for penetration
 
-        //System.out.print(entity + " Damage: " + finalDamage + "    Distance: " + this.blocksTraveled + " \n");
-
-        dealBulletDamage(entity);
+        dealBulletDamage(entity, finalDamage);
         doBulletEffects(entity);
 
         this.collisions++;
@@ -112,7 +110,7 @@ public class BulletEntity extends ThrownItemEntity {
 
     }
 
-    protected void dealBulletDamage(Entity victim) {
+    protected void dealBulletDamage(Entity victim, float damage) {
         victim.damage(this.getDamageSources().create(RegistryKey.of(RegistryKeys.DAMAGE_TYPE, SimpleWarfare.getIdentifier("bullet")), (this.getOwner() instanceof LivingEntity livingOwner ? livingOwner : null)), damage);
     }
 
@@ -236,8 +234,6 @@ public class BulletEntity extends ThrownItemEntity {
         this.hitBlockPoss = new ArrayList<>();
 
         //TODO sound effect while flying near player
-        world.addParticle(ParticleTypes.CRIT, true, this.getPos().getX(), this.getPos().getY(), this.getPos().getZ(), 0, 0, 0);
-
 
         this.dontCollide = true;
         super.tick();
