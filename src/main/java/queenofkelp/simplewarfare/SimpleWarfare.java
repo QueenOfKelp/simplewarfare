@@ -30,7 +30,7 @@ public class SimpleWarfare implements ModInitializer {
 
     public static final Gun AK47 = new Gun(new FabricItemSettings().maxDamage(210), 5, AmmoType.MEDIUM, 30, 5,
             5, 1, new GunBloom(1, 12, 4.5f, .75f, true, .75f, .75f),
-            .85f, -.2f, -.5f, 3, 2/3d, 20, 20, true, new ThresholdDamageDropoff(new LinkedHashMap<>()).add(65, .65f)
+            .35f, -.2f, -.5f, 3, 2/3d, 20, 20, true, new ThresholdDamageDropoff(new LinkedHashMap<>()).add(65, .65f)
             .add(50, .8f).add(25, 1), new GunSound(SoundEvents.ENTITY_FIREWORK_ROCKET_BLAST, 5, .75f));
 
     public static final BulletItem MEDIUM_BULLET = new BulletItem(new FabricItemSettings(), AmmoType.MEDIUM);

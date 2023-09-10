@@ -16,6 +16,7 @@
     "KeyBindingMixin",
     "KeyBindingMixin$BoundKeyAccessor",
     "KeyBindingMixin$TimesPressedAccessor",
+    "MouseMixin",
     "PlayerEntityRendererMixin"
   ],
   "injectors": {
