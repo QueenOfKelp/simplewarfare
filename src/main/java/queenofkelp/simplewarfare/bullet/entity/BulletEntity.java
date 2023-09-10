@@ -234,6 +234,7 @@ public class BulletEntity extends ThrownItemEntity {
         this.hitBlockPoss = new ArrayList<>();
 
         //TODO sound effect while flying near player
+        this.getWorld().addParticle(ParticleTypes.CRIT, true, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
 
         this.dontCollide = true;
         super.tick();

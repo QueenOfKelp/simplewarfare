@@ -40,16 +40,7 @@ public class BulletUtil {
 
         Direction facing = Direction.getFacing(direction.getX(), direction.getY(), direction.getZ());
 
-        int steps = 0;
         while(currentPos.distanceTo(start) <= start.distanceTo(end)) {
-
-            if (steps % 100 == 0) {
-                for (Entity e : entity.getWorld().getOtherEntities(null, entity.getBoundingBox().expand(100))) {
-                    if (e instanceof ServerPlayerEntity sp) {
-                        ServerPlayNetworking.send(sp, QPackets.S2C_SPAWN_PARTICLE, QPackets.makeSpawnParticlesBuffer(ParticleTypes.CRIT, currentPos.getX(), currentPos.getY() - .01, currentPos.getZ(), 0, 0, 0));
-                    }
-                }
-            }
 
             Box offsetBox = entity.getBoundingBox().offset(currentPos.subtract(start));
 
@@ -80,7 +71,6 @@ public class BulletUtil {
                 return new BlockHitResult(currentPos, facing, blockpos, true);
             }
 
-            steps++;
             currentPos = currentPos.add(direction.multiply(.01));
         }
         return BlockHitResult.createMissed(end, facing, BlockPos.ofFloored(end));
