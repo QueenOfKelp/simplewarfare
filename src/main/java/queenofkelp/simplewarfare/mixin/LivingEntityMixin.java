@@ -29,12 +29,16 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Shadow public abstract Iterable<ItemStack> getArmorItems();
 
+    @Shadow public abstract void damageArmor(DamageSource source, float amount);
+
     public float applyBulletproofArmorToDamage(DamageSource source, float amount) {
         int bulletproofArmor = 0;
 
         if (!source.isIn(QTags.USES_BULLETPROOF_PROECTION_INSTEAD)) {
             return amount;
         }
+
+        this.damageArmor(source, amount);
 
         for (ItemStack armorItemStack : this.getArmorItems()) {
             if (armorItemStack.getItem() instanceof ArmorItem armorItem) {

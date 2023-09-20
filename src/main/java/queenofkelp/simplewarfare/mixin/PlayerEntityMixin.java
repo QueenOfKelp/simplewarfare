@@ -136,6 +136,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             return amount;
         }
 
+        this.damageArmor(source, amount);
+
         for (ItemStack armorItemStack : this.getArmorItems()) {
             if (armorItemStack.getItem() instanceof ArmorItem armorItem) {
                 if (armorItem.getMaterial() instanceof BulletproofArmorMaterial bulletproofArmorMaterial) {

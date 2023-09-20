@@ -35,7 +35,8 @@ public abstract class MouseMixin {
         this.lastMouseUpdateTime = d;
         if (this.isCursorLocked() && this.client.isWindowFocused()) {
             double f = (Double)this.client.options.getMouseSensitivity().getValue() * 0.6000000238418579 + 0.20000000298023224;
-            double g = (client.player == null) ? 0 : f * f * f * (this.client.player.getFovMultiplier() * 8);
+            double fovMult = (client.player == null || this.client.player.getFovMultiplier() > 1) ? 1 : this.client.player.getFovMultiplier();
+            double g = (client.player == null) ? 0 : f * f * f * (fovMult * 8);
 
             double k;
             double l;
