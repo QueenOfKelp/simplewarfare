@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FlyingItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
@@ -34,7 +35,7 @@ import queenofkelp.simplewarfare.util.CollisionsAccessor;
 
 import java.util.List;
 
-public abstract class AbstractGrenadeEntity extends ProjectileEntity implements FlyingItemEntity {
+public abstract class AbstractGrenadeEntity extends PersistentProjectileEntity implements FlyingItemEntity {
 
     protected int startFuse;
     protected int fuse;
