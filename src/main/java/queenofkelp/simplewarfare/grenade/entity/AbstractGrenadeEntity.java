@@ -4,10 +4,13 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.FlyingItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -31,7 +34,7 @@ import queenofkelp.simplewarfare.util.CollisionsAccessor;
 
 import java.util.List;
 
-public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
+public abstract class AbstractGrenadeEntity extends ProjectileEntity implements FlyingItemEntity {
 
     protected int startFuse;
     protected int fuse;
@@ -49,17 +52,19 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, LivingEntity owner, World world,
                                  int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount) {
-        super(entityType, owner, world);
+        super(entityType, world);
 
         this.startFuse = startFuse;
         this.fuse = startFuse;
         this.frictionAmount = frictionAmount;
         this.explodeOnImpact = explodeOnImpact;
         this.bounceAmount = bounceAmount;
+        this.setOwner(owner);
     }
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, double x, double y, double z, World world) {
-        super(entityType, x, y, z, world);
+        super(entityType, world);
+        this.setPos(x, y, z);
     }
 
     public int getFuse() {
@@ -113,8 +118,7 @@ public abstract class AbstractGrenadeEntity extends ThrownItemEntity {
         super.readNbt(nbt);
     }
 
-    @Override
-    protected Item getDefaultItem() {
+    protected ItemStack getItem() {
         return null;
     }
 
