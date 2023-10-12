@@ -4,8 +4,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
-import net.minecraft.item.Item;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -26,7 +26,7 @@ import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class BulletEntity extends ThrownItemEntity {
+public class BulletEntity extends PersistentProjectileEntity {
     protected double bounceAmount = .5;
     protected float damage;
     protected int collisions = 0;
@@ -65,12 +65,6 @@ public class BulletEntity extends ThrownItemEntity {
 
     protected double getBounceAmount() {
         return this.bounceAmount;
-    }
-
-
-    @Override
-    protected Item getDefaultItem() {
-        return null;
     }
 
     protected void onEntityHit(EntityHitResult entityHitResult) {
@@ -122,6 +116,11 @@ public class BulletEntity extends ThrownItemEntity {
 
     protected boolean canHit(Entity entity) {
         return super.canHit(entity) && (this.hitEntities == null || !this.hitEntities.contains(entity));
+    }
+
+    @Override
+    protected ItemStack asItemStack() {
+        return null;
     }
 
     protected boolean canHit(BlockPos blockpos) {
@@ -241,4 +240,8 @@ public class BulletEntity extends ThrownItemEntity {
     }
 
 
+    @Override
+    public boolean cannotBeSilenced() {
+        return super.cannotBeSilenced();
+    }
 }

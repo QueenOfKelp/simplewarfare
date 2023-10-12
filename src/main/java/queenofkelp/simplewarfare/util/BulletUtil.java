@@ -19,7 +19,9 @@ import net.minecraft.world.World;
 import queenofkelp.simplewarfare.bullet.entity.BulletEntity;
 import queenofkelp.simplewarfare.networking.QPackets;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class BulletUtil {
@@ -44,7 +46,9 @@ public class BulletUtil {
 
             Box offsetBox = entity.getBoundingBox().offset(currentPos.subtract(start));
 
-            Iterator<Entity> iterator = world.getOtherEntities(entity, offsetBox, entityPredicate).iterator();
+            List<Entity> nearbyEntities = new ArrayList<>(world.getOtherEntities(entity, offsetBox, entityPredicate));
+
+            Iterator<Entity> iterator = nearbyEntities.iterator();
             BlockPos blockpos = BlockPos.ofFloored(currentPos);
             BlockState blockState = world.getBlockState(blockpos);
 
