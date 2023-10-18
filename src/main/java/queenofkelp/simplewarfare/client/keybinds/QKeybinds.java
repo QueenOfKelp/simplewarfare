@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.network.PacketByteBuf;
@@ -13,8 +14,6 @@ import queenofkelp.simplewarfare.networking.QPackets;
 public class QKeybinds {
 
     public static KeyBinding reloadKey;
-    public static KeyBinding shootKey;
-    public static KeyBinding ADSKey;
 
     public boolean hasPressedShootKey = false;
     public boolean wasADSed;
@@ -40,15 +39,8 @@ public class QKeybinds {
             }
         });
 
-        shootKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.simplewarfare.shoot",
-                InputUtil.Type.MOUSE,
-                GLFW.GLFW_MOUSE_BUTTON_1,
-                "category.simplewarfare"
-        ));
-
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (shootKey.isPressed()) {
+            if (MinecraftClient.getInstance().options.attackKey.isPressed()) {
                 PacketByteBuf packet = PacketByteBufs.create();
                 packet.writeBoolean(INSTANCE.hasPressedShootKey);
                 ClientPlayNetworking.send(QPackets.C2S_SHOOT, packet);
@@ -59,19 +51,12 @@ public class QKeybinds {
             }
         });
 
-        ADSKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.simplewarfare.ads",
-                InputUtil.Type.MOUSE,
-                GLFW.GLFW_MOUSE_BUTTON_2,
-                "category.simplewarfare"
-        ));
-
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (client.player != null) {
-                if (ADSKey.isPressed() != INSTANCE.wasADSed) {
-                    ClientPlayNetworking.send(QPackets.C2S_SYNC_ADS, QPackets.makeSyncPlayerADSBuffer(client.player, ADSKey.isPressed()));
+                if (MinecraftClient.getInstance().options.useKey.isPressed() != INSTANCE.wasADSed) {
+                    ClientPlayNetworking.send(QPackets.C2S_SYNC_ADS, QPackets.makeSyncPlayerADSBuffer(client.player, MinecraftClient.getInstance().options.useKey.isPressed()));
                 }
-                INSTANCE.wasADSed = ADSKey.isPressed();
+                INSTANCE.wasADSed = MinecraftClient.getInstance().options.useKey.isPressed();
             }
         });
     }

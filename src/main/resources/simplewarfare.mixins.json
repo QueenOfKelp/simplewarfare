@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CollisionsAccessorMixin",
-    "KeyBindingMixin$SelectedItemAccessor",
     "LivingEntityMixin",
     "ModEntityDataSaverMixin",
     "PlayerEntityMixin"
@@ -13,9 +12,7 @@
   "client": [
     "AbstractClientPlayerEntityMixin",
     "HeldItemRendererMixin",
-    "KeyBindingMixin",
-    "KeyBindingMixin$BoundKeyAccessor",
-    "KeyBindingMixin$TimesPressedAccessor",
+    "MinecraftClientMixin",
     "MouseMixin",
     "PlayerEntityRendererMixin"
   ],
