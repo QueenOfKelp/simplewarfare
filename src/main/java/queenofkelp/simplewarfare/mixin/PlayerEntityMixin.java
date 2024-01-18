@@ -58,7 +58,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     public void removeGunSpeedEffect(PlayerEntity player) {
-        Objects.requireNonNull(player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).removeModifier(speedModifier);
+        Objects.requireNonNull(player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).removeModifier(speedModifier.getId());
     }
 
     float speed;

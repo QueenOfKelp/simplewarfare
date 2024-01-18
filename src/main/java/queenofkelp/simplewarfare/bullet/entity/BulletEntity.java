@@ -41,17 +41,17 @@ public class BulletEntity extends PersistentProjectileEntity {
     protected boolean wallBanging = false;
     protected DamageDropoff damageDropOff;
 
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, World world) {
-        super(entityType, world);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, World world, ItemStack stack) {
+        super(entityType, world, stack);
     }
 //a
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world) {
-        super(entityType, owner, world);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world, ItemStack stack) {
+        super(entityType, owner, world, stack);
     }
 
     public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world, float damage, int fireRate,
-                        int penetration, DamageDropoff damageDropOff, double penetrationMaxDropOff) {
-        super(entityType, owner, world);
+                        int penetration, DamageDropoff damageDropOff, double penetrationMaxDropOff, ItemStack stack) {
+        super(entityType, owner, world, stack);
         this.damage = damage;
         this.fireRate = fireRate;
         this.penetration = penetration;
@@ -59,8 +59,8 @@ public class BulletEntity extends PersistentProjectileEntity {
         this.damageDropOff = damageDropOff;
     }
 
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, double x, double y, double z, World world) {
-        super(entityType, x, y, z, world);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, double x, double y, double z, World world, ItemStack stack) {
+        super(entityType, x, y, z, world, stack);
     }
 
     protected double getBounceAmount() {
@@ -132,7 +132,7 @@ public class BulletEntity extends PersistentProjectileEntity {
             return;
         }
         super.onCollision(hitResult);
-        if (!this.world.isClient) {
+        if (!this.getWorld().isClient) {
 
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 Vec3d oldVelocity = this.getVelocity();
@@ -164,7 +164,7 @@ public class BulletEntity extends PersistentProjectileEntity {
                     this.wallBanging = true;
                 }
                 else {
-                    world.playSound(null, this.getBlockPos(), SoundEvents.BLOCK_BELL_USE, SoundCategory.MASTER, 1f, 2f);
+                    getWorld().playSound(null, this.getBlockPos(), SoundEvents.BLOCK_BELL_USE, SoundCategory.MASTER, 1f, 2f);
                     this.bounce(this.getBounceAmount(), blockHitResult.getSide(), oldVelocity);
                 }
                 if (collisions > penetration) {

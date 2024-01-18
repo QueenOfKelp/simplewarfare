@@ -43,11 +43,11 @@ public class NearestShootableTargetGoal<T extends LivingEntity> extends TrackTar
 
     protected void findTarget() {
         if (this.targetClass != PlayerEntity.class && this.targetClass != ServerPlayerEntity.class) {
-            this.target = this.mob.world.getClosestEntity(this.mob.world.getEntitiesByClass(this.targetClass, this.getTargetSearchArea(), (entityliving) -> {
+            this.target = this.mob.getWorld().getClosestEntity(this.mob.getWorld().getEntitiesByClass(this.targetClass, this.getTargetSearchArea(), (entityliving) -> {
                 return true;
             }), this.targetPredicate, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
         } else {
-            this.target = this.mob.world.getClosestPlayer(this.targetPredicate, this.mob, this.rangeX, this.rangeY, this.rangeX);
+            this.target = this.mob.getWorld().getClosestPlayer(this.targetPredicate, this.mob, this.rangeX, this.rangeY, this.rangeX);
         }
 
     }

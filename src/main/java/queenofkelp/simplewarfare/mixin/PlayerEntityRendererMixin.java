@@ -14,7 +14,7 @@ import queenofkelp.simplewarfare.gun.item.Gun;
 import queenofkelp.simplewarfare.util.gun.GunShooterUtil;
 
 @Mixin(PlayerEntityRenderer.class)
-public class PlayerEntityRendererMixin {
+public abstract class PlayerEntityRendererMixin {
 
     @Inject(method = "getArmPose", at = @At("HEAD"), cancellable = true)
     private static void getArmPose(AbstractClientPlayerEntity player, Hand hand, CallbackInfoReturnable<BipedEntityModel.ArmPose> cir) {

@@ -47,13 +47,13 @@ public abstract class AbstractGrenadeEntity extends PersistentProjectileEntity i
     protected double bounceAmount;
 
 
-    public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, World world) {
-        super(entityType, world);
+    public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, World world, ItemStack stack) {
+        super(entityType, world, stack);
     }
 
     public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, LivingEntity owner, World world,
-                                 int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount) {
-        super(entityType, world);
+                                 int startFuse, double frictionAmount, boolean explodeOnImpact, double bounceAmount, ItemStack stack) {
+        super(entityType, world, stack);
 
         this.startFuse = startFuse;
         this.fuse = startFuse;
@@ -63,8 +63,8 @@ public abstract class AbstractGrenadeEntity extends PersistentProjectileEntity i
         this.setOwner(owner);
     }
 
-    public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, double x, double y, double z, World world) {
-        super(entityType, world);
+    public AbstractGrenadeEntity(EntityType<? extends AbstractGrenadeEntity> entityType, double x, double y, double z, World world, ItemStack stack) {
+        super(entityType, world, stack);
         this.setPos(x, y, z);
     }
 
@@ -126,7 +126,7 @@ public abstract class AbstractGrenadeEntity extends PersistentProjectileEntity i
     protected void onEntityHit(EntityHitResult entityHitResult) { // called on entity hit.
         super.onEntityHit(entityHitResult);
         Entity entity = entityHitResult.getEntity();
-        if (!this.world.isClient) {
+        if (!this.getWorld().isClient) {
             if (this.isExplodeOnImpact()) {
                 this.explode();
             }
@@ -135,8 +135,8 @@ public abstract class AbstractGrenadeEntity extends PersistentProjectileEntity i
 
     protected void onCollision(HitResult hitResult) { // called on collision with a block
         super.onCollision(hitResult);
-        if (!this.world.isClient) { // checks if the world is client
-            this.world.sendEntityStatus(this, (byte)3); // particle?
+        if (!this.getWorld().isClient) { // checks if the world is client
+            this.getWorld().sendEntityStatus(this, (byte)3); // particle?
             if (this.isExplodeOnImpact()) {
                 this.explode();
             }
