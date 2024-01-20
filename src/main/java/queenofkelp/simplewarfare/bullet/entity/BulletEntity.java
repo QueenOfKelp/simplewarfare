@@ -5,12 +5,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -26,7 +30,7 @@ import queenofkelp.simplewarfare.util.damage_dropoff.DamageDropoff;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class BulletEntity extends PersistentProjectileEntity {
+public class BulletEntity extends ThrownItemEntity {
     protected double bounceAmount = .5;
     protected float damage;
     protected int collisions = 0;
@@ -41,17 +45,17 @@ public class BulletEntity extends PersistentProjectileEntity {
     protected boolean wallBanging = false;
     protected DamageDropoff damageDropOff;
 
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, World world, ItemStack stack) {
-        super(entityType, world, stack);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, World world) {
+        super(entityType, world);
     }
 //a
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world, ItemStack stack) {
-        super(entityType, owner, world, stack);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world) {
+        super(entityType, owner, world);
     }
 
     public BulletEntity(EntityType<? extends BulletEntity> entityType, LivingEntity owner, World world, float damage, int fireRate,
-                        int penetration, DamageDropoff damageDropOff, double penetrationMaxDropOff, ItemStack stack) {
-        super(entityType, owner, world, stack);
+                        int penetration, DamageDropoff damageDropOff, double penetrationMaxDropOff) {
+        super(entityType, owner, world);
         this.damage = damage;
         this.fireRate = fireRate;
         this.penetration = penetration;
@@ -59,8 +63,8 @@ public class BulletEntity extends PersistentProjectileEntity {
         this.damageDropOff = damageDropOff;
     }
 
-    public BulletEntity(EntityType<? extends BulletEntity> entityType, double x, double y, double z, World world, ItemStack stack) {
-        super(entityType, x, y, z, world, stack);
+    public BulletEntity(EntityType<? extends BulletEntity> entityType, double x, double y, double z, World world) {
+        super(entityType, x, y, z, world);
     }
 
     protected double getBounceAmount() {
@@ -116,11 +120,6 @@ public class BulletEntity extends PersistentProjectileEntity {
 
     protected boolean canHit(Entity entity) {
         return super.canHit(entity) && (this.hitEntities == null || !this.hitEntities.contains(entity));
-    }
-
-    @Override
-    protected ItemStack asItemStack() {
-        return null;
     }
 
     protected boolean canHit(BlockPos blockpos) {
@@ -243,5 +242,15 @@ public class BulletEntity extends PersistentProjectileEntity {
     @Override
     public boolean cannotBeSilenced() {
         return super.cannotBeSilenced();
+    }
+
+    @Override
+    protected Item getDefaultItem() {
+        return Items.AIR;
+    }
+
+    @Override
+    public Text getStyledDisplayName() {
+        return super.getStyledDisplayName();
     }
 }
